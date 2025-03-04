@@ -50,7 +50,7 @@ gsap.from('.feature-item', {
 
 // Video Background with Image Fades
 let videoBg = document.createElement('video');
-videoBg.src = 'luxury-home-theater.mp4';
+videoBg.src = 'background_vid_showT_WS.mp4';
 videoBg.autoplay = true;
 videoBg.loop = true;
 videoBg.muted = true;
