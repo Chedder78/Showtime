@@ -57,7 +57,7 @@ videoBg.muted = true;
 videoBg.classList.add('video-background');
 document.body.prepend(videoBg);
 
-const images = ['image1.jpg', 'image2.jpg', 'image3.jpg'];
+const images = ['universal_upscale_0_5edef70e-c291-40fc-8f5f-c7d382334a04_0.jpg', 'universal_upscale_0_31e6e98d-b32f-47d6-b430-13b117939c35_0.jpg', 'alchemyrefiner_alchemymagic_3_79db12fc-f4df-4447-a8c5-8589a9dcc27e_0.jpg'];
 let imageIndex = 0;
 const fadingImage = document.createElement('img');
 fadingImage.classList.add('fading-image');
