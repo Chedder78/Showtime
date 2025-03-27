@@ -1,169 +1,179 @@
-<!-- its-showtime-luxury-form.html -->
+<!-- its-showtime-premium.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>It's Showtime – Luxury Home Theater Consultation</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>It's Showtime – Ultimate Home Theater</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Basic Reset and Fonts */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body, html { font-family: 'Helvetica Neue', sans-serif; scroll-behavior: smooth; }
-
-    /* Parallax Container */
-    .parallax-section {
-      height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
-      perspective: 1px;
-      background-color: #000;
+    html, body {
+      margin: 0;
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #000;
       color: #fff;
     }
-    .parallax-layer {
-      position: absolute;
-      width: 100%;
-      transform: translateZ(-1px) scale(2);
-      z-index: -1;
-      background-size: cover;
-      background-attachment: fixed;
-      height: 100%;
+
+    /* Carousel */
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      width: 100vw;
     }
 
-    .content {
-      padding: 20vh 5vw;
+    .carousel img {
+      flex: none;
+      width: 100vw;
+      height: 60vh;
+      object-fit: cover;
+      scroll-snap-align: start;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .overlay-text {
+      position: absolute;
+      top: 40vh;
+      width: 100%;
+      text-align: center;
+      font-size: 2rem;
+      background: rgba(0,0,0,0.5);
+      padding: 1rem;
+    }
+
+    section {
+      padding: 4vh 5vw;
       text-align: center;
     }
 
-    .headline {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-
-    .subhead {
-      font-size: 1.2rem;
-      color: #ccc;
-    }
-
-    .question-box {
-      margin: 5vh auto;
-    }
-
     .question-box button {
-      padding: 10px 20px;
-      margin: 0 10px;
+      margin: 1rem;
+      padding: 12px 24px;
       font-size: 1rem;
-      cursor: pointer;
-      border: none;
       background: #fff;
       color: #000;
-      transition: all 0.2s ease;
-    }
-
-    .question-box button:hover {
-      background: #ddd;
+      border: none;
+      cursor: pointer;
     }
 
     .form-container {
       display: none;
-      margin-top: 3rem;
-      animation: fadeIn 0.5s ease-in-out forwards;
+      margin-top: 2rem;
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    form {
+      max-width: 400px;
+      margin: auto;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      margin-top: 0.2rem;
+    }
+
+    button.submit-btn {
+      margin-top: 1.5rem;
+      background: #fff;
+      color: #000;
+      padding: 12px 24px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
     }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    form {
-      display: inline-block;
-      text-align: left;
-      max-width: 400px;
-      width: 100%;
-    }
-
-    label {
-      display: block;
-      margin: 1rem 0 0.3rem;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-    }
-
-    button.submit-btn {
-      background: #fff;
-      color: #000;
-      padding: 12px 24px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .thank-you {
-      display: none;
-      margin-top: 2rem;
-      font-size: 1.2rem;
-      color: #8f8;
-    }
   </style>
 </head>
 <body>
-  <div class="parallax-section">
-    <div class="parallax-layer" style="background-image: url('your-background-image-1.jpg');"></div>
-    <div class="content">
-      <h1 class="headline">It’s Showtime</h1>
-      <p class="subhead">Exclusive Home Theater Design & Installation for Luxury Homes</p>
 
-      <div class="question-box">
-        <p style="margin-bottom: 1rem;">Do you own your home?</p>
-        <button onclick="showForm()">Yes</button>
-        <button onclick="alert('We are currently serving homeowners only. Thank you!')">No</button>
-      </div>
+<!-- Auto-scrolling carousel -->
+<div class="carousel" id="carousel">
+  <img src="your-image1.jpg" alt="Luxury Theater">
+  <img src="your-image2.jpg" alt="Custom Installations">
+  <img src="your-image3.jpg" alt="Smart Integration">
+</div>
 
-      <div id="form-section" class="form-container">
-        <form id="consultation-form" onsubmit="handleSubmit(event)">
-<!-- enhancements added to previous example -->
+<section id="step1">
+  <h1>Have you ever dreamed of the most thrilling home THEATER EXPERIENCE?</h1>
+  <div class="question-box">
+    <button onclick="nextStep('step2')">Yes</button>
+    <button onclick="alert('When you’re ready for luxury, we’ll be here.')">No</button>
+  </div>
+</section>
 
-<!-- Inside the <form> tag -->
-<form id="consultation-form" onsubmit="handleSubmit(event)">
+<section id="step2" style="display: none;">
+  <h2>Do you own your home?</h2>
+  <div class="question-box">
+    <button onclick="nextStep('form-section')">Yes</button>
+    <button onclick="alert('We specialize in homeowner installs. Thank you for your interest!')">No</button>
+  </div>
+</section>
+
+<section id="form-section" class="form-container">
+  <h2>Request a Free Consultation</h2>
+ <form
+  action="https://formspree.io/f/yourformid" 
+  method="POST"
+  id="consultation-form"
+>
+  <!-- Spam honeypot (invisible to real users) -->
+  <input type="text" name="_gotcha" style="display:none">
+
+  <!-- Optional redirect after submit -->
+  <input type="hidden" name="_next" value="https://yourdomain.com/thank-you.html">
+
   <label for="name">Name</label>
   <input type="text" id="name" name="name" autocomplete="name" required>
 
   <label for="email">Email</label>
-  <input type="email" id="email" name="email" autocomplete="email" required>
+  <input type="email" id="email" name="email" autocomplete="email">
 
-  <label for="phone">Phone</label>
-  <input type="tel" id="phone" name="phone" autocomplete="tel">
+  <label for="phone">Mobile</label>
+  <input type="tel" id="phone" name="phone" autocomplete="tel" required>
 
-  <label for="message">Project Details (optional)</label>
-  <textarea id="message" name="message" autocomplete="off" rows="4"></textarea>
-
-  <button type="submit" class="submit-btn">Request Free Consultation</button>
+  <button type="submit" class="submit-btn">Get My Free Consultation</button>
 </form>
 
-        </form>
-        <div id="thank-you" class="thank-you">Thank you! A designer will be in touch shortly.</div>
-      </div>
-    </div>
-  </div>
+</section>
 
-  <script>
-    function showForm() {
-      document.getElementById('form-section').style.display = 'block';
-    }
+<script>
+  function nextStep(id) {
+    document.getElementById(id).style.display = 'block';
+    window.scrollTo({ top: document.getElementById(id).offsetTop, behavior: 'smooth' });
+  }
 
-    function handleSubmit(e) {
-      e.preventDefault();
-      document.getElementById('consultation-form').style.display = 'none';
-      document.getElementById('thank-you').style.display = 'block';
-      // For actual use, hook this to a backend or form service
-    }
-  </script>
+  function handleSubmit(e) {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const name = form.get('name');
+    const email = form.get('email');
+    const phone = form.get('phone');
+
+    // Redirect or call backend here
+    alert(`Thanks, ${name}! A designer will contact you at ${email || phone}.`);
+  }
+
+  // Optional: auto-scroll carousel every few seconds
+  setInterval(() => {
+    const carousel = document.getElementById('carousel');
+    carousel.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
+  }, 4000);
+</script>
+
 </body>
 </html>
