@@ -67,7 +67,7 @@
       color: #ddd;
     }
 
-    input, select {
+    input, select, textarea {
       margin-top: 6px;
       padding: 10px;
       border: none;
@@ -75,6 +75,11 @@
       background: #2a2a2a;
       color: #fff;
       font-size: 1rem;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
     }
 
     button {
@@ -154,6 +159,33 @@
     .form-container {
       display: none;
     }
+
+    .thank-you {
+      background: #1e1e1e;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .thank-you h2 {
+      color: gold;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .thank-you p, .thank-you ul {
+      color: #ccc;
+      font-size: 1rem;
+    }
+
+    .thank-you ul {
+      list-style: inside disc;
+      padding-left: 0;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -192,12 +224,12 @@
     </header>
 
     <!-- Main Form (shown after project selection) -->
-    <form action="https://formspree.io/f/your-placeholder" method="POST" class="form form-container" style="display:none;" data-aos="fade-up">
+    <form id="consultationForm" class="form form-container" style="display:none;" data-aos="fade-up">
       <input type="hidden" name="project_type" id="project_type_input" />
       <input type="hidden" name="source" value="fb_ad_3_smart_homeowners">
 
       <label>Do you own your home?
-        <select name="own_home" required>
+        <select name="own_home" id="own_home" required>
           <option value="">Select one</option>
           <option value="yes">Yes</option>
           <option value="no">No</option>
@@ -205,7 +237,7 @@
       </label>
 
       <label>What are you planning?
-        <select name="project_type" required>
+        <select name="project_type" id="project_type" required>
           <option value="">Select</option>
           <option value="home_theater">Home Theater Setup</option>
           <option value="whole_house_audio">Whole-House Audio</option>
@@ -217,11 +249,11 @@
       </label>
 
       <label>Square footage of the home?
-        <input type="text" name="square_footage" placeholder="e.g. 2,800 sq ft" />
+        <input type="text" name="square_footage" id="square_footage" placeholder="e.g. 2,800 sq ft" />
       </label>
 
       <label>Timeline for the project?
-        <select name="timeline">
+        <select name="timeline" id="timeline">
           <option value="">Choose One</option>
           <option value="asap">ASAP</option>
           <option value="1_month">Within 1 Month</option>
@@ -232,7 +264,7 @@
       </label>
 
       <label>Budget Range?
-        <select name="budget">
+        <select name="budget" id="budget">
           <option value="">Choose One</option>
           <option value="under5k">Under $5,000</option>
           <option value="5k-15k">$5,000 – $15,000</option>
@@ -242,19 +274,42 @@
       </label>
 
       <label>Contact Name:
-        <input type="text" name="name" required />
+        <input type="text" name="name" id="name" required />
       </label>
 
       <label>Email:
-        <input type="email" name="email" required />
+        <input type="email" name="email" id="email" required />
       </label>
 
       <label>Phone:
-        <input type="tel" name="phone" />
+        <input type="tel" name="phone" id="phone" />
+      </label>
+
+      <label>Additional Details:
+        <textarea name="message" id="message" rows="3"></textarea>
       </label>
 
       <button type="submit">Request My Free Consultation</button>
     </form>
+
+    <!-- QUALIFIED THANK YOU -->
+    <div id="thankYouQualified" class="thank-you" style="display:none;" data-aos="fade-up">
+      <h2>Thank You!</h2>
+      <p>We've received your request and will contact you shortly to schedule your consultation.</p>
+      <p>Our team works directly with homeowners to build the perfect home entertainment experience.</p>
+    </div>
+
+    <!-- NOT QUALIFIED MESSAGE -->
+    <div id="thankYouRejected" class="thank-you" style="display:none;" data-aos="fade-up">
+      <h2>Thank You for Your Interest</h2>
+      <p>At this time, we only provide complimentary consultations for homeowners planning:</p>
+      <ul>
+        <li>Remodels or new construction</li>
+        <li>Whole-home audio or smart automation</li>
+        <li>Dedicated home theater projects</li>
+      </ul>
+      <p>If your needs change in the future, we'd love to hear from you again.</p>
+    </div>
 
     <div class="cta-banner" data-aos="zoom-in">
       <h3>Limited Openings This Month</h3>
@@ -266,6 +321,22 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       AOS.init({ duration: 1000 });
+      
+      // Prefill from URL parameters
+      const params = new URLSearchParams(window.location.search);
+      ['name', 'email', 'phone', 'message', 'own_home', 'project_type', 
+       'square_footage', 'timeline', 'budget'].forEach(id => {
+        if (params.has(id)) {
+          const field = document.getElementById(id);
+          if (field) field.value = params.get(id);
+        }
+      });
+      
+      // Attach form handler
+      const form = document.getElementById('consultationForm');
+      if (form) {
+        form.addEventListener('submit', handleSubmit);
+      }
     });
 
     function setProject(type) {
@@ -290,6 +361,50 @@
       document.querySelector('#dynamicSubtext').innerText = subtext[type];
       document.querySelector('#project_type_input').value = type;
       document.querySelector('select[name="project_type"]').value = type;
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+
+      const data = new FormData(e.target);
+      const projectType = data.get('project_type');
+      const ownHome = data.get('own_home');
+
+      // QUALIFICATION LOGIC
+      const disqualified =
+        ownHome === "no" ||
+        projectType === "simple_install" ||
+        !projectType || !ownHome;
+
+      // Hide all form elements
+      document.querySelector('.form').style.display = 'none';
+      document.querySelector('.form-container').style.display = 'none';
+      document.querySelector('.cta-banner').style.display = 'none';
+      document.querySelector('.qualify-message').style.display = 'none';
+      document.querySelector('.project-selector').style.display = 'none';
+
+      if (disqualified) {
+        document.getElementById('thankYouRejected').style.display = 'block';
+      } else {
+        document.getElementById('thankYouQualified').style.display = 'block';
+        // Optional: Facebook Pixel conversion tracking
+        if (typeof fbq !== 'undefined') {
+          fbq('track', 'Lead');
+        }
+        
+        // Submit data to server (optional)
+        const form = e.target;
+        const formAction = form.getAttribute('action');
+        const formMethod = form.getAttribute('method');
+        
+        fetch(formAction, {
+          method: formMethod,
+          body: new FormData(form),
+          headers: {
+            'Accept': 'application/json'
+          }
+        }).catch(error => console.error('Error:', error));
+      }
     }
   </script>
 </body>
