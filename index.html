@@ -186,13 +186,69 @@
       padding-left: 0;
       margin-top: 10px;
     }
+
+    .trust-badges {
+      display: flex;
+      justify-content: space-around;
+      margin: 25px 0;
+      padding: 15px;
+      background: rgba(255,215,0,0.05);
+      border-radius: 8px;
+    }
+
+    .trust-badges div {
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .trust-badges svg {
+      width: 24px;
+      height: 24px;
+      fill: gold;
+      margin-bottom: 5px;
+    }
+
+    .newsletter-fallback {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,215,0,0.2);
+    }
+
+    .newsletter-fallback input {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .availability {
+      background: rgba(255,215,0,0.05);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+      border: 1px dashed gold;
+    }
+
+    .consultant-profiles {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .consultant-profiles img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid gold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- Initial Header -->
     <header data-aos="fade-down">
-      <h1>Luxury Home Tech That Works Seamlessly</h1>
+      <h1 id="dynamicLocationHeader">Luxury Home Tech That Works Seamlessly</h1>
       <p>Custom home theaters, whole-house audio & automation — done the right way for discerning homeowners.</p>
     </header>
 
@@ -222,6 +278,27 @@
       <h1 id="dynamicHeadline"></h1>
       <p id="dynamicSubtext"></p>
     </header>
+
+    <!-- Trust Badges -->
+    <div class="trust-badges" data-aos="fade-up">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"/></svg>
+        <p>15+ Years Experience</p>
+      </div>
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 10.43V2H7v8.43c0 .35.18.68.49.86l4.18 2.51-.99 2.34-3.41.29 2.59 2.24L9.55 22 12 20.23 14.45 22l-.78-3.33 2.59-2.24-3.41-.29-.99-2.34 4.18-2.51c.3-.18.48-.5.48-.86zm-6 .17l-1.5-.9V4h3v5.53l-1.5.9zm3.5 2.1l-1.5.9-1.5-.9-1.17.7-1.5-.9 3-1.8 3 1.8-1.5.9-1.33-.8z"/></svg>
+        <p>50+ Builder Partners</p>
+      </div>
+    </div>
+
+    <!-- Availability Notice -->
+    <div class="availability" data-aos="zoom-in">
+      <p><strong>Only 3 premium installation slots left</strong> for June.</p>
+      <div class="consultant-profiles">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Lead Installer">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="AV Designer">
+      </div>
+    </div>
 
     <!-- Main Form (shown after project selection) -->
     <form id="consultationForm" class="form form-container" style="display:none;" data-aos="fade-up">
@@ -309,6 +386,12 @@
         <li>Dedicated home theater projects</li>
       </ul>
       <p>If your needs change in the future, we'd love to hear from you again.</p>
+      
+      <div class="newsletter-fallback">
+        <p>Get our premium home tech guide:</p>
+        <input type="email" id="fallback-email" placeholder="Your email" />
+        <button onclick="submitFallback()">Download Guide</button>
+      </div>
     </div>
 
     <div class="cta-banner" data-aos="zoom-in">
@@ -337,6 +420,31 @@
       if (form) {
         form.addEventListener('submit', handleSubmit);
       }
+
+      // Real-time qualification
+      const homeOwnership = document.getElementById('own_home');
+      if (homeOwnership) {
+        homeOwnership.addEventListener('change', function() {
+          if (this.value === 'no') {
+            document.querySelector('.form').style.display = 'none';
+            document.querySelector('.form-container').style.display = 'none';
+            document.querySelector('.cta-banner').style.display = 'none';
+            document.querySelector('.qualify-message').style.display = 'none';
+            document.getElementById('thankYouRejected').style.display = 'block';
+          }
+        });
+      }
+
+      // Geo-targeting (example using IP)
+      fetch('https://ipinfo.io/json?token=demo') // Replace with your token
+        .then(res => res.json())
+        .then(data => {
+          if (data.city && ['Beverly Hills', 'Malibu', 'Santa Monica'].includes(data.city)) {
+            document.getElementById('dynamicLocationHeader').innerText = 
+              `${data.city} Home Theater Specialists`;
+          }
+        })
+        .catch(() => {}); // Fail silently
     });
 
     function setProject(type) {
@@ -369,6 +477,14 @@
       const data = new FormData(e.target);
       const projectType = data.get('project_type');
       const ownHome = data.get('own_home');
+      const budget = data.get('budget');
+      const squareFootage = parseInt(data.get('square_footage').replace(/\D/g,'')) || 0;
+
+      // Lead scoring
+      let leadScore = 0;
+      if (budget === 'over30k') leadScore += 3;
+      else if (budget === '15k-30k') leadScore += 2;
+      if (squareFootage > 3000) leadScore += 1;
 
       // QUALIFICATION LOGIC
       const disqualified =
@@ -382,28 +498,55 @@
       document.querySelector('.cta-banner').style.display = 'none';
       document.querySelector('.qualify-message').style.display = 'none';
       document.querySelector('.project-selector').style.display = 'none';
+      document.querySelector('.trust-badges').style.display = 'none';
+      document.querySelector('.availability').style.display = 'none';
 
       if (disqualified) {
         document.getElementById('thankYouRejected').style.display = 'block';
       } else {
         document.getElementById('thankYouQualified').style.display = 'block';
-        // Optional: Facebook Pixel conversion tracking
-        if (typeof fbq !== 'undefined') {
-          fbq('track', 'Lead');
-        }
         
-        // Submit data to server (optional)
+        // Facebook Pixel tracking (if available)
+        if (typeof fbq !== 'undefined') {
+          fbq('track', 'Lead', { value: leadScore });
+        }
+
+        // Submit data to server
         const form = e.target;
         const formAction = form.getAttribute('action');
         const formMethod = form.getAttribute('method');
         
+        // Add lead score to form data
+        const formData = new FormData(form);
+        formData.append('lead_score', leadScore);
+
         fetch(formAction, {
           method: formMethod,
-          body: new FormData(form),
+          body: formData,
           headers: {
             'Accept': 'application/json'
           }
         }).catch(error => console.error('Error:', error));
+      }
+    }
+
+    function submitFallback() {
+      const email = document.getElementById('fallback-email').value;
+      if (email) {
+        // Send to email list (example using Formspree)
+        fetch('https://formspree.io/f/YOUR_FORM_ID', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            email: email,
+            source: 'unqualified_lead',
+            interest: 'premium_guide'
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(() => {
+          alert('Thank you! The guide will be sent to your email.');
+        });
       }
     }
   </script>
