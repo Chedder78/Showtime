@@ -1,179 +1,296 @@
-<!-- its-showtime-premium.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>It's Showtime – Ultimate Home Theater</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Free Home Tech Consultation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
-    html, body {
+    body {
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      font-family: 'Helvetica Neue', sans-serif;
-      background: #000;
-      color: #fff;
+      padding: 0;
+      background: #0f0f0f;
+      color: #f5f5f5;
     }
 
-    /* Carousel */
-    .carousel {
-      display: flex;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      scroll-snap-type: x mandatory;
-      width: 100vw;
-    }
-
-    .carousel img {
-      flex: none;
-      width: 100vw;
-      height: 60vh;
-      object-fit: cover;
-      scroll-snap-align: start;
-    }
-
-    .carousel::-webkit-scrollbar {
-      display: none;
-    }
-
-    .overlay-text {
-      position: absolute;
-      top: 40vh;
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -2;
       width: 100%;
+      height: 100%;
+      background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center/cover;
+      filter: brightness(0.3) blur(2px);
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+    }
+
+    header {
       text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: gold;
       font-size: 2rem;
-      background: rgba(0,0,0,0.5);
-      padding: 1rem;
+      margin-bottom: 10px;
     }
 
-    section {
-      padding: 4vh 5vw;
-      text-align: center;
-    }
-
-    .question-box button {
-      margin: 1rem;
-      padding: 12px 24px;
+    header p {
+      color: #ccc;
       font-size: 1rem;
-      background: #fff;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      color: #ddd;
+    }
+
+    input, select {
+      margin-top: 6px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #2a2a2a;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 14px;
+      font-size: 1rem;
+      background: gold;
       color: #000;
       border: none;
+      border-radius: 10px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #f2c200;
+    }
+
+    .cta-banner {
+      background: #222;
+      border: 2px dashed gold;
+      padding: 20px;
+      text-align: center;
+      margin-top: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+    }
+
+    .cta-banner h3 {
+      color: gold;
+      font-size: 1.4rem;
+      margin-bottom: 5px;
+    }
+
+    .cta-banner p {
+      color: #ccc;
+      font-size: 1rem;
+    }
+
+    .qualify-message {
+      background: #2b2b2b;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+    }
+
+    .qualify-message h2 {
+      color: gold;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    .qualify-message ul {
+      list-style: inside disc;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+
+    .project-selector {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .btn-group button {
+      padding: 12px 20px;
+      font-size: 0.9rem;
     }
 
     .form-container {
       display: none;
-      margin-top: 2rem;
-      animation: fadeIn 0.5s ease-out forwards;
-    }
-
-    form {
-      max-width: 400px;
-      margin: auto;
-      text-align: left;
-    }
-
-    label {
-      display: block;
-      margin-top: 1rem;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      font-size: 1rem;
-      margin-top: 0.2rem;
-    }
-
-    button.submit-btn {
-      margin-top: 1.5rem;
-      background: #fff;
-      color: #000;
-      padding: 12px 24px;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <!-- Initial Header -->
+    <header data-aos="fade-down">
+      <h1>Luxury Home Tech That Works Seamlessly</h1>
+      <p>Custom home theaters, whole-house audio & automation — done the right way for discerning homeowners.</p>
+    </header>
 
-<!-- Auto-scrolling carousel -->
-<div class="carousel" id="carousel">
-  <img src="your-image1.jpg" alt="Luxury Theater">
-  <img src="your-image2.jpg" alt="Custom Installations">
-  <img src="your-image3.jpg" alt="Smart Integration">
-</div>
+    <section class="qualify-message" data-aos="fade-up">
+      <h2>Do You Qualify?</h2>
+      <p>This free consultation is for homeowners planning:</p>
+      <ul>
+        <li>Remodels or New Construction</li>
+        <li>Whole-home audio or smart lighting</li>
+        <li>Dedicated theater room or media zone</li>
+      </ul>
+      <p><strong>Simple installs like TV mounting or soundbars are not included.</strong></p>
+    </section>
 
-<section id="step1">
-  <h1>Have you ever dreamed of the most thrilling home THEATER EXPERIENCE?</h1>
-  <div class="question-box">
-    <button onclick="nextStep('step2')">Yes</button>
-    <button onclick="alert('When you’re ready for luxury, we’ll be here.')">No</button>
+    <!-- Project Type Selector -->
+    <div class="project-selector" data-aos="fade-up">
+      <h2>Which best describes your project?</h2>
+      <div class="btn-group">
+        <button type="button" onclick="setProject('new_construction')">New Build</button>
+        <button type="button" onclick="setProject('remodeling')">Remodel</button>
+        <button type="button" onclick="setProject('retrofit')">Retrofit</button>
+      </div>
+    </div>
+
+    <!-- Dynamic Header (shown after project selection) -->
+    <header data-aos="fade-down" class="form-container" style="display:none;">
+      <h1 id="dynamicHeadline"></h1>
+      <p id="dynamicSubtext"></p>
+    </header>
+
+    <!-- Main Form (shown after project selection) -->
+    <form action="https://formspree.io/f/your-placeholder" method="POST" class="form form-container" style="display:none;" data-aos="fade-up">
+      <input type="hidden" name="project_type" id="project_type_input" />
+      <input type="hidden" name="source" value="fb_ad_3_smart_homeowners">
+
+      <label>Do you own your home?
+        <select name="own_home" required>
+          <option value="">Select one</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <label>What are you planning?
+        <select name="project_type" required>
+          <option value="">Select</option>
+          <option value="home_theater">Home Theater Setup</option>
+          <option value="whole_house_audio">Whole-House Audio</option>
+          <option value="home_automation">Home Automation</option>
+          <option value="remodeling">Home Remodel</option>
+          <option value="new_construction">New Construction</option>
+          <option value="simple_install">TV or Speaker Only</option>
+        </select>
+      </label>
+
+      <label>Square footage of the home?
+        <input type="text" name="square_footage" placeholder="e.g. 2,800 sq ft" />
+      </label>
+
+      <label>Timeline for the project?
+        <select name="timeline">
+          <option value="">Choose One</option>
+          <option value="asap">ASAP</option>
+          <option value="1_month">Within 1 Month</option>
+          <option value="3_months">1–3 Months</option>
+          <option value="6_months">3–6 Months</option>
+          <option value="undecided">Still Planning</option>
+        </select>
+      </label>
+
+      <label>Budget Range?
+        <select name="budget">
+          <option value="">Choose One</option>
+          <option value="under5k">Under $5,000</option>
+          <option value="5k-15k">$5,000 – $15,000</option>
+          <option value="15k-30k">$15,000 – $30,000</option>
+          <option value="over30k">Over $30,000</option>
+        </select>
+      </label>
+
+      <label>Contact Name:
+        <input type="text" name="name" required />
+      </label>
+
+      <label>Email:
+        <input type="email" name="email" required />
+      </label>
+
+      <label>Phone:
+        <input type="tel" name="phone" />
+      </label>
+
+      <button type="submit">Request My Free Consultation</button>
+    </form>
+
+    <div class="cta-banner" data-aos="zoom-in">
+      <h3>Limited Openings This Month</h3>
+      <p>Schedule now to reserve your preferred install window</p>
+    </div>
   </div>
-</section>
 
-<section id="step2" style="display: none;">
-  <h2>Do you own your home?</h2>
-  <div class="question-box">
-    <button onclick="nextStep('form-section')">Yes</button>
-    <button onclick="alert('We specialize in homeowner installs. Thank you for your interest!')">No</button>
-  </div>
-</section>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      AOS.init({ duration: 1000 });
+    });
 
-<section id="form-section" class="form-container">
-  <h2>Request a Free Consultation</h2>
- <form
-  action="https://formspree.io/f/yourformid" 
-  method="POST"
-  id="consultation-form"
->
-  <!-- Spam honeypot (invisible to real users) -->
-  <input type="text" name="_gotcha" style="display:none">
+    function setProject(type) {
+      document.querySelector('.project-selector').style.display = 'none';
+      document.querySelectorAll('.form-container').forEach(el => {
+        el.style.display = 'block';
+      });
 
-  <!-- Optional redirect after submit -->
-  <input type="hidden" name="_next" value="https://yourdomain.com/thank-you.html">
+      const headline = {
+        new_construction: "Prewire Your Dream Home Right",
+        remodeling: "Upgrade as You Remodel",
+        retrofit: "Smart Tech for Existing Homes"
+      };
 
-  <label for="name">Name</label>
-  <input type="text" id="name" name="name" autocomplete="name" required>
+      const subtext = {
+        new_construction: "Start fresh with smart automation, theater, lighting, and whole-home sound. We'll work directly with your builder.",
+        remodeling: "Remodeling? Don't settle for basic. Integrate stunning home theater and connected tech.",
+        retrofit: "No demo? No problem. We retrofit AV, automation, and sound into existing homes cleanly."
+      };
 
-  <label for="email">Email</label>
-  <input type="email" id="email" name="email" autocomplete="email">
-
-  <label for="phone">Mobile</label>
-  <input type="tel" id="phone" name="phone" autocomplete="tel" required>
-
-  <button type="submit" class="submit-btn">Get My Free Consultation</button>
-</form>
-
-</section>
-
-<script>
-  function nextStep(id) {
-    document.getElementById(id).style.display = 'block';
-    window.scrollTo({ top: document.getElementById(id).offsetTop, behavior: 'smooth' });
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    const form = new FormData(e.target);
-    const name = form.get('name');
-    const email = form.get('email');
-    const phone = form.get('phone');
-
-    // Redirect or call backend here
-    alert(`Thanks, ${name}! A designer will contact you at ${email || phone}.`);
-  }
-
-  // Optional: auto-scroll carousel every few seconds
-  setInterval(() => {
-    const carousel = document.getElementById('carousel');
-    carousel.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
-  }, 4000);
-</script>
-
+      document.querySelector('#dynamicHeadline').innerText = headline[type];
+      document.querySelector('#dynamicSubtext').innerText = subtext[type];
+      document.querySelector('#project_type_input').value = type;
+      document.querySelector('select[name="project_type"]').value = type;
+    }
+  </script>
 </body>
 </html>
