@@ -1,3 +1,8 @@
+// SIMPLE FIX - ADD THESE 3 LINES AT THE TOP
+document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+document.getElementById('start-screen').style.display = 'flex';
+document.getElementById('start-btn').onclick = () => { document.getElementById('start-screen').style.display = 'none'; gameState.gameActive = true; };
+
 // ==================== GAME STATE ====================
 const gameState = {
     scene: null,
