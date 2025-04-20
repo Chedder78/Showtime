@@ -1,0 +1,10 @@
+/* FORCE START SCREEN VISIBLE */
+#start-screen {
+  display: flex !important;
+  z-index: 9999 !important;
+}
+
+/* HIDE OTHER SCREENS */
+.screen:not(#start-screen) {
+  display: none !important;
+}
