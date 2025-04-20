@@ -1,135 +1,264 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Neon Tempest Ultra</title>
-  <style>
-    body { 
-      margin: 0; 
-      overflow: hidden; 
-      background: #000;
-      font-family: 'Courier New', monospace;
-      touch-action: none; /* Critical for mobile controls */
-    }
-    #game-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-    }
-    #hud {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: #0ff;
-      background: rgba(0,0,0,0.7);
-      padding: 10px 15px;
-      border: 2px solid #0ff;
-      border-radius: 8px;
-      text-shadow: 0 0 5px #0ff;
-      font-size: 18px;
-      z-index: 100;
-    }
-    #game-over {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #f0f;
-      background: rgba(0,0,0,0.8);
-      padding: 30px;
-      border: 3px solid #f0f;
-      border-radius: 15px;
-      text-align: center;
-      display: none;
-      text-shadow: 0 0 10px #f0f;
-      z-index: 200;
-      width: 80%;
-      max-width: 400px;
-    }
-    #mobile-controls {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      display: none; /* Hidden by default, shown on mobile */
-    }
-    #fire-btn {
-      width: 80px;
-      height: 80px;
-      background: rgba(0,255,255,0.2);
-      border-radius: 50%;
-      border: 2px solid #0ff;
-      backdrop-filter: blur(5px);
-    }
-    button {
-      background: linear-gradient(to bottom, #00f, #007);
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      margin-top: 15px;
-      border-radius: 25px;
-      font-family: 'Courier New', monospace;
-      font-size: 18px;
-      cursor: pointer;
-      box-shadow: 0 0 15px #00f;
-      transition: all 0.3s;
-    }
-    button:hover {
-      background: linear-gradient(to bottom, #00a, #005);
-      transform: scale(1.05);
-    }
-    @media (max-width: 768px) {
-      #mobile-controls {
-        display: block; /* Show on mobile */
-      }
-      #hud {
-        font-size: 16px;
-        padding: 8px 12px;
-      }
-    }
-  </style>
+    <title>Space Shooter</title>
+    <style>
+        body { 
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: Arial;
+            touch-action: manipulation;
+        }
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background: #111;
+        }
+        #hud {
+            color: white;
+            padding: 10px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 18px;
+        }
+        #mobileControls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: none;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .mobile-btn {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            user-select: none;
+        }
+    </style>
 </head>
 <body>
-  <div id="game-container">
-    <!-- Three.js canvas auto-inserted here -->
-    
     <div id="hud">
-      SCORE: <span id="score">0</span> | 
-      HEALTH: <span id="health">100</span> | 
-      LEVEL: <span id="level">1</span> | 
-      HI-SCORE: <span id="high-score">0</span>
+        SCORE: <span id="score">0</span> | 
+        LIVES: <span id="lives">3</span>
     </div>
-    
-    <div id="game-over">
-      <h1 style="margin: 0 0 10px;">GAME OVER</h1>
-      <p style="font-size: 24px;">FINAL SCORE: <span id="final-score">0</span></p>
-      <button id="restart-btn">PLAY AGAIN</button>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div id="mobileControls">
+        <div class="mobile-btn" id="leftBtn">←</div>
+        <div class="mobile-btn" id="shootBtn">⚡</div>
+        <div class="mobile-btn" id="rightBtn">→</div>
     </div>
-    
-    <!-- Mobile Controls -->
-    <div id="mobile-controls">
-      <div id="fire-btn" title="Fire"></div>
-    </div>
-  </div>
 
-  <!-- Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
-  
-  <!-- Main Game Script -->
-  <script src="main.js"></script>
-  
-  <!-- Mobile Detection -->
-  <script>
-    // Detect mobile to adjust controls
-    function isMobile() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      if (isMobile()) {
-        document.body.classList.add('mobile');
-      }
-    });
-  </script>
+    <script>
+        // Game Config
+        const CONFIG = {
+            PLAYER_SPEED: 5,
+            BULLET_SPEED: 10,
+            ENEMY_SPAWN_RATE: 1000,
+            POWERUP_CHANCE: 0.1
+        };
+
+        // Game Elements
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const mobileControls = document.getElementById('mobileControls');
+
+        // Touch Device Detection
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (isTouchDevice) mobileControls.style.display = 'flex';
+
+        // Game State
+        let score = 0;
+        let lives = 3;
+        let gameOver = false;
+        let lastEnemySpawn = 0;
+        let lastShot = 0;
+
+        // Player
+        const player = {
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 60,
+            width: 50,
+            height: 50,
+            color: '#00FFFF',
+            speed: CONFIG.PLAYER_SPEED,
+            bullets: []
+        };
+
+        // Enemies
+        const enemies = [];
+        const enemyBullets = [];
+
+        // Input
+        const keys = {
+            ArrowLeft: false,
+            ArrowRight: false,
+            Space: false
+        };
+
+        // Event Listeners
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) keys[e.code] = true;
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            if (['ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) keys[e.code] = false;
+        });
+
+        // Mobile Controls
+        if (isTouchDevice) {
+            document.getElementById('leftBtn').addEventListener('touchstart', () => keys.ArrowLeft = true);
+            document.getElementById('leftBtn').addEventListener('touchend', () => keys.ArrowLeft = false);
+            document.getElementById('rightBtn').addEventListener('touchstart', () => keys.ArrowRight = true);
+            document.getElementById('rightBtn').addEventListener('touchend', () => keys.ArrowRight = false);
+            document.getElementById('shootBtn').addEventListener('touchstart', () => keys.Space = true);
+            document.getElementById('shootBtn').addEventListener('touchend', () => keys.Space = false);
+        }
+
+        // Game Functions
+        function drawRect(x, y, width, height, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+        }
+
+        function shoot() {
+            const now = Date.now();
+            if (now - lastShot > 300) { // Cooldown
+                player.bullets.push({
+                    x: player.x + player.width / 2 - 2,
+                    y: player.y,
+                    width: 4,
+                    height: 10,
+                    color: '#00FF00'
+                });
+                lastShot = now;
+            }
+        }
+
+        function spawnEnemy() {
+            enemies.push({
+                x: Math.random() * (canvas.width - 40),
+                y: -40,
+                width: 40,
+                height: 40,
+                color: '#FF0000',
+                speed: 2 + Math.random() * 2
+            });
+        }
+
+        function update() {
+            if (gameOver) return;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Player movement
+            if (keys.ArrowLeft) player.x = Math.max(0, player.x - player.speed);
+            if (keys.ArrowRight) player.x = Math.min(canvas.width - player.width, player.x + player.speed);
+            if (keys.Space) shoot();
+
+            // Draw player
+            drawRect(player.x, player.y, player.width, player.height, player.color);
+
+            // Enemy spawning
+            if (Date.now() - lastEnemySpawn > CONFIG.ENEMY_SPAWN_RATE) {
+                spawnEnemy();
+                lastEnemySpawn = Date.now();
+            }
+
+            // Update bullets
+            updateBullets();
+            updateEnemies();
+            checkCollisions();
+            updateHUD();
+
+            requestAnimationFrame(update);
+        }
+
+        function updateBullets() {
+            // Player bullets
+            for (let i = player.bullets.length - 1; i >= 0; i--) {
+                const bullet = player.bullets[i];
+                bullet.y -= CONFIG.BULLET_SPEED;
+                drawRect(bullet.x, bullet.y, bullet.width, bullet.height, bullet.color);
+                
+                if (bullet.y < 0) {
+                    player.bullets.splice(i, 1);
+                }
+            }
+        }
+
+        function updateEnemies() {
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                enemy.y += enemy.speed;
+                drawRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
+                
+                if (enemy.y > canvas.height) {
+                    enemies.splice(i, 1);
+                }
+            }
+        }
+
+        function checkCollisions() {
+            // Bullet-enemy collisions
+            for (let i = player.bullets.length - 1; i >= 0; i--) {
+                const bullet = player.bullets[i];
+                
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    const enemy = enemies[j];
+                    
+                    if (bullet.x < enemy.x + enemy.width &&
+                        bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height &&
+                        bullet.y + bullet.height > enemy.y) {
+                        
+                        player.bullets.splice(i, 1);
+                        enemies.splice(j, 1);
+                        score += 10;
+                        break;
+                    }
+                }
+            }
+
+            // Player-enemy collisions
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                
+                if (player.x < enemy.x + enemy.width &&
+                    player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height &&
+                    player.y + player.height > enemy.y) {
+                    
+                    enemies.splice(i, 1);
+                    lives--;
+                    
+                    if (lives <= 0) {
+                        gameOver = true;
+                        alert(`Game Over! Score: ${score}`);
+                    }
+                }
+            }
+        }
+
+        function updateHUD() {
+            scoreElement.textContent = score;
+            livesElement.textContent = lives;
+        }
+
+        // Start game
+        update();
+    </script>
 </body>
 </html>
