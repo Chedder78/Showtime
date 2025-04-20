@@ -61,6 +61,25 @@ function init() {
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(0, 1, 0);
     scene.add(directionalLight);
+
+    // Add to init():
+function setupTouchControls() {
+  const touchArea = renderer.domElement;
+  touchArea.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = touchArea.getBoundingClientRect();
+    player.position.x = ((touch.clientX - rect.left) / rect.width) * 30 - 15;
+    player.position.z = ((touch.clientY - rect.top) / rect.height) * 30 - 15;
+  });
+
+  // Add on-screen fire button
+  const fireBtn = document.createElement('div');
+  fireBtn.style = `position: absolute; bottom: 20px; right: 20px; width: 80px; height: 80px; background: rgba(0,255,255,0.3); border-radius: 50%; border: 2px solid #0ff;`;
+  fireBtn.addEventListener('touchstart', () => keys[' '] = true);
+  fireBtn.addEventListener('touchend', () => keys[' '] = false);
+  document.getElementById('game-container').appendChild(fireBtn);
+}
     
     // Create player
     createPlayer();
