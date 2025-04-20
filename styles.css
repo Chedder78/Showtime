@@ -1,0 +1,183 @@
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #000;
+  font-family: 'Orbitron', sans-serif;
+  color: #fff;
+}
+
+#game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* HUD Styles */
+#hud {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 100;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-label {
+  color: #00ffff;
+  text-shadow: 0 0 5px #00ffff;
+  font-size: 16px;
+  min-width: 70px;
+}
+
+.hud-value {
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.health-bar {
+  width: 100px;
+  height: 10px;
+  background-color: rgba(255, 0, 0, 0.3);
+  border: 1px solid #ff0000;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.health-fill {
+  height: 100%;
+  width: 100%;
+  background-color: #ff0000;
+  transition: width 0.3s ease;
+}
+
+.lives-container {
+  display: flex;
+  gap: 5px;
+}
+
+.life-icon {
+  width: 20px;
+  height: 20px;
+  background-color: #00ffff;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+#powerup-display {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  color: #00ff00;
+  font-size: 16px;
+  text-shadow: 0 0 5px #00ff00;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #00ff00;
+  z-index: 100;
+}
+
+/* Screen Overlays */
+.screen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 30px;
+  border-radius: 10px;
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 20px #00ffff;
+  z-index: 200;
+  display: none;
+}
+
+.screen h1 {
+  color: #00ffff;
+  text-shadow: 0 0 10px #00ffff;
+  margin-bottom: 20px;
+  font-size: 3rem;
+}
+
+#start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.controls-info {
+  color: #ffffff;
+  text-align: left;
+  line-height: 1.8;
+}
+
+.score-display {
+  color: #ffffff;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.score-display span {
+  color: #00ffff;
+}
+
+/* Buttons */
+.btn {
+  background-color: #00ffff;
+  color: #000;
+  border: none;
+  padding: 12px 25px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.btn:hover {
+  background-color: #ffffff;
+  box-shadow: 0 0 15px #ffffff;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hud-label {
+    font-size: 14px;
+    min-width: 60px;
+  }
+  
+  .hud-value {
+    font-size: 16px;
+  }
+  
+  .health-bar {
+    width: 80px;
+  }
+  
+  .screen h1 {
+    font-size: 2rem;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+}
