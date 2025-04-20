@@ -4,48 +4,78 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Neon Tempest Ultra</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: #000; }
-    #game-container { position: relative; width: 100vw; height: 100vh; }
-    #hud { position: absolute; top: 10px; left: 10px; color: #0ff; font-family: 'Courier New', monospace; }
-    #game-over, #level-start { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-    #powerup-display { position: absolute; bottom: 10px; right: 10px; color: #0f0; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="game-container">
-    <!-- Three.js injects canvas here -->
+    <!-- Three.js canvas will be inserted here -->
+    
     <div id="hud">
-      SCORE: <span id="score">0</span> | 
-      HEALTH: <span id="health">100</span> | 
-      LEVEL: <span id="level">1</span> | 
-      POWER: <span id="power">NORMAL</span>
+      <div class="hud-item">
+        <span class="hud-label">SCORE</span>
+        <span id="score" class="hud-value">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">HEALTH</span>
+        <div id="health-bar" class="health-bar">
+          <div id="health-fill" class="health-fill"></div>
+        </div>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">LEVEL</span>
+        <span id="level" class="hud-value">1</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">POWER</span>
+        <span id="power" class="hud-value">NORMAL</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">LIVES</span>
+        <div id="lives-container" class="lives-container">
+          <!-- Lives will be added by JavaScript -->
+        </div>
+      </div>
     </div>
+    
     <div id="powerup-display"></div>
-    <div id="game-over" style="display: none;">
+    
+    <div id="start-screen" class="screen">
+      <h1>NEON TEMPEST</h1>
+      <div class="controls-info">
+        <p>WASD/Arrows: Move</p>
+        <p>SPACE: Shoot</p>
+        <p>P: Pause</p>
+      </div>
+      <button id="start-btn" class="btn">START GAME</button>
+    </div>
+    
+    <div id="game-over" class="screen">
       <h1>GAME OVER</h1>
-      <button id="restart-btn">TRY AGAIN</button>
+      <div class="score-display">
+        <p>FINAL SCORE: <span id="final-score">0</span></p>
+        <p>HIGH SCORE: <span id="high-score">0</span></p>
+      </div>
+      <button id="restart-btn" class="btn">PLAY AGAIN</button>
+    </div>
+    
+    <div id="level-start" class="screen">
+      <h1>LEVEL <span id="level-display">1</span></h1>
+      <p id="level-message">Prepare for battle!</p>
+    </div>
+    
+    <div id="pause-menu" class="screen">
+      <h1>PAUSED</h1>
+      <button id="resume-btn" class="btn">RESUME</button>
     </div>
   </div>
+
+  <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
-  <script src="./main.js"></script>
-  <!-- Three.js (Core Library) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-
-<!-- Three.js OrbitControls (For Debugging - Optional) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-
-<!-- Howler.js (Audio Library) -->
-<script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
-<!-- GLTF Loader (For 3D Models) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-
-<!-- Tween.js (For Smooth Animations) -->
-<script src="https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.6.4/dist/tween.umd.js"></script>
-
-<!-- dat.GUI (For Debug UI) -->
-<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.min.js"></script>
+  
+  <!-- Main Game Script -->
+  <script src="main.js"></script>
 </body>
 </html>
