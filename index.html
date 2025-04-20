@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dual Joystick 3D Asteroids</title>
+    <title>Drone-Style 3D Asteroids</title>
     <style>
         body { 
             margin: 0;
@@ -78,6 +78,14 @@
             font-weight: bold;
             -webkit-tap-highlight-color: transparent;
         }
+        .joystick-label {
+            position: absolute;
+            top: -25px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+        }
         #orientation-warning {
             display: none;
             position: fixed;
@@ -129,17 +137,19 @@
     <div id="ui">SCORE: <span id="score">0</span> | LIVES: <span id="lives">3</span></div>
     
     <div class="joystick-container">
-        <!-- Left Joystick (Movement) -->
-        <div class="joystick" id="move-joystick">
+        <!-- Left Joystick (Throttle/Yaw) -->
+        <div class="joystick" id="throttle-joystick">
+            <div class="joystick-label">THROTTLE/YAW</div>
             <div class="joystick-base"></div>
-            <div class="joystick-thumb" id="move-thumb"></div>
+            <div class="joystick-thumb" id="throttle-thumb"></div>
             <div class="fire-btn" id="left-fire">FIRE</div>
         </div>
         
-        <!-- Right Joystick (Rotation) -->
-        <div class="joystick" id="rotate-joystick">
+        <!-- Right Joystick (Pitch/Roll) -->
+        <div class="joystick" id="move-joystick">
+            <div class="joystick-label">PITCH/ROLL</div>
             <div class="joystick-base"></div>
-            <div class="joystick-thumb" id="rotate-thumb"></div>
+            <div class="joystick-thumb" id="move-thumb"></div>
             <div class="fire-btn" id="right-fire">FIRE</div>
         </div>
     </div>
@@ -148,9 +158,9 @@
         Please rotate your device to landscape mode for the best experience
     </div>
     <div id="start-screen">
-        <h1>DUAL JOYSTICK 3D ASTEROIDS</h1>
-        <p>Left stick: Move ship</p>
-        <p>Right stick: Rotate view</p>
+        <h1>DRONE-STYLE 3D ASTEROIDS</h1>
+        <p>Left stick: Up/Down = Throttle | Left/Right = Yaw (spin)</p>
+        <p>Right stick: Up/Down = Pitch | Left/Right = Roll</p>
         <p>Fire buttons: Shoot asteroids</p>
         <button id="start-btn">START GAME</button>
     </div>
@@ -200,7 +210,7 @@
         const stars = new THREE.Points(starsGeometry, starsMaterial);
         scene.add(stars);
 
-        // Player ship
+        // Player ship (drone-like)
         const shipGeometry = new THREE.ConeGeometry(0.5, 1.5, 3);
         shipGeometry.rotateX(Math.PI / 2);
         const shipMaterial = new THREE.MeshPhongMaterial({ 
@@ -265,27 +275,39 @@
         let lives = 3;
         let gameOver = false;
         let gameStarted = false;
-        const moveSpeed = 0.15;
-        const rotateSpeed = 0.02;
-        const bulletSpeed = 0.8;
+        
+        // Drone physics
+        const physics = {
+            position: new THREE.Vector3(),
+            velocity: new THREE.Vector3(),
+            rotation: new THREE.Euler(),
+            thrust: 0,
+            maxSpeed: 0.3,
+            throttleSpeed: 0.001,
+            rotationSpeed: 0.02,
+            pitch: 0,
+            roll: 0,
+            yaw: 0
+        };
+
         let lastShot = 0;
         const shotDelay = 300;
 
         // Joystick controls
-        const moveJoystick = {
+        const throttleJoystick = {
             active: false,
-            x: 0,
-            y: 0,
-            element: document.getElementById('move-thumb'),
-            base: document.getElementById('move-joystick')
+            x: 0, // Yaw (left/right rotation)
+            y: 0, // Throttle (up/down)
+            element: document.getElementById('throttle-thumb'),
+            base: document.getElementById('throttle-joystick')
         };
 
-        const rotateJoystick = {
+        const moveJoystick = {
             active: false,
-            x: 0,
-            y: 0,
-            element: document.getElementById('rotate-thumb'),
-            base: document.getElementById('rotate-joystick')
+            x: 0, // Roll (left/right tilt)
+            y: 0, // Pitch (forward/back tilt)
+            element: document.getElementById('move-thumb'),
+            base: document.getElementById('move-joystick')
         };
 
         // Initialize joysticks
@@ -337,8 +359,8 @@
             document.addEventListener('touchend', handleEnd);
         }
 
+        setupJoystick(throttleJoystick);
         setupJoystick(moveJoystick);
-        setupJoystick(rotateJoystick);
 
         // Fire buttons
         document.getElementById('left-fire').addEventListener('touchstart', (e) => {
@@ -369,19 +391,46 @@
             
             requestAnimationFrame(gameLoop);
             
-            // Ship movement (left joystick)
-            ship.position.x += moveJoystick.x * moveSpeed;
-            ship.position.y += -moveJoystick.y * moveSpeed;
+            // Apply drone physics based on joystick input
+            
+            // Left stick: Throttle (Y) and Yaw (X)
+            physics.thrust = throttleJoystick.y * physics.throttleSpeed;
+            physics.yaw = throttleJoystick.x * physics.rotationSpeed;
+            
+            // Right stick: Pitch (Y) and Roll (X)
+            physics.pitch = moveJoystick.y * physics.rotationSpeed;
+            physics.roll = moveJoystick.x * physics.rotationSpeed;
+            
+            // Update rotation
+            ship.rotation.x += physics.pitch;
+            ship.rotation.z += physics.roll;
+            ship.rotation.y += physics.yaw;
+            
+            // Calculate forward vector based on ship rotation
+            const forward = new THREE.Vector3(0, 0, -1);
+            forward.applyQuaternion(ship.quaternion);
+            
+            // Apply movement forces
+            physics.velocity.add(forward.multiplyScalar(physics.thrust));
+            
+            // Limit speed
+            if (physics.velocity.length() > physics.maxSpeed) {
+                physics.velocity.normalize().multiplyScalar(physics.maxSpeed);
+            }
+            
+            // Apply some drag
+            physics.velocity.multiplyScalar(0.98);
+            
+            // Update position
+            ship.position.add(physics.velocity);
             
             // Keep ship in bounds
-            ship.position.x = Math.max(-20, Math.min(20, ship.position.x));
-            ship.position.y = Math.max(-15, Math.min(15, ship.position.y));
-            
-            // Camera rotation (right joystick)
-            camera.position.x = ship.position.x + 10 * Math.sin(rotateJoystick.x * Math.PI);
-            camera.position.y = ship.position.y + 10 * rotateJoystick.y;
-            camera.position.z = ship.position.z + 10 * Math.cos(rotateJoystick.x * Math.PI);
-            camera.lookAt(ship.position);
+            ['x', 'y', 'z'].forEach(axis => {
+                if (Math.abs(ship.position[axis]) > 50) {
+                    ship.position[axis] = Math.sign(ship.position[axis]) * 50;
+                    physics.velocity[axis] *= -0.5; // Bounce off boundaries
+                }
+            });
             
             // Update asteroids
             asteroids.forEach(asteroid => {
@@ -400,9 +449,9 @@
             
             // Update bullets
             bullets.forEach((bullet, index) => {
-                // Move bullet in direction camera is facing
+                // Move bullet in direction ship is facing
                 const direction = new THREE.Vector3(0, 0, -1);
-                direction.applyQuaternion(camera.quaternion);
+                direction.applyQuaternion(ship.quaternion);
                 direction.multiplyScalar(bulletSpeed);
                 bullet.position.add(direction);
                 
@@ -468,9 +517,16 @@
                     } else {
                         // Reset position after hit
                         ship.position.set(0, 0, 0);
+                        physics.velocity.set(0, 0, 0);
+                        ship.rotation.set(0, 0, 0);
                     }
                 }
             });
+            
+            // Update camera to follow ship
+            camera.position.copy(ship.position);
+            camera.position.z += 10;
+            camera.lookAt(ship.position);
             
             renderer.render(scene, camera);
         }
@@ -499,6 +555,13 @@
             document.getElementById('score').textContent = score;
             document.getElementById('lives').textContent = lives;
             
+            // Reset physics
+            physics.velocity.set(0, 0, 0);
+            physics.thrust = 0;
+            physics.pitch = 0;
+            physics.roll = 0;
+            physics.yaw = 0;
+            
             // Clear existing asteroids
             asteroids.forEach(asteroid => scene.remove(asteroid));
             asteroids.length = 0;
@@ -512,8 +575,9 @@
                 createAsteroid();
             }
             
-            // Reset ship position
+            // Reset ship position and rotation
             ship.position.set(0, 0, 0);
+            ship.rotation.set(0, 0, 0);
             
             // Reset camera
             camera.position.set(0, 0, 10);
