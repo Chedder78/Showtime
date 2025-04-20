@@ -21,6 +21,7 @@
       background-color: var(--dark-bg);
       font-family: 'Orbitron', sans-serif;
       color: white;
+      touch-action: none;
     }
     
     #game-container {
@@ -94,23 +95,74 @@
       box-shadow: 0 0 10px #ff0000;
     }
     
-    /* Powerup Display with Pulsing Effect */
-    #powerup-display {
+    /* Power-up Display */
+    .powerup-notification {
+      display: none;
       position: absolute;
       bottom: 30px;
       right: 30px;
-      padding: 12px 20px;
+      background: rgba(0, 247, 255, 0.15);
+      border: 1px solid var(--neon-blue);
+      padding: 10px 20px;
       border-radius: 8px;
-      font-weight: bold;
+      font-family: 'Orbitron', sans-serif;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      animation: pulse 1.5s infinite alternate;
       z-index: 100;
     }
     
-    @keyframes pulse {
-      from { opacity: 0.7; }
-      to { opacity: 1; }
+    .powerup-timer {
+      height: 3px;
+      background: linear-gradient(90deg, var(--neon-blue), transparent);
+      margin-top: 5px;
+      transition: width 0.1s linear;
+    }
+    
+    /* Boss Health Bar */
+    #boss-health-container {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--hud-bg);
+      backdrop-filter: blur(10px);
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 0, 0, 0.5);
+      display: none;
+      z-index: 100;
+    }
+    
+    /* Touch Controls */
+    #touch-controls {
+      position: absolute;
+      bottom: 30px;
+      width: 100%;
+      display: none;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 50;
+    }
+    
+    .touch-zone {
+      width: 120px;
+      height: 120px;
+      background: rgba(0, 247, 255, 0.1);
+      border-radius: 50%;
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      pointer-events: auto;
+      position: relative;
+    }
+    
+    .touch-zone::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 247, 255, 0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
     
     /* Screen Overlays with CRT Effect */
@@ -185,6 +237,7 @@
       position: relative;
       overflow: hidden;
       z-index: 1;
+      margin: 10px;
     }
     
     .btn::before {
@@ -208,6 +261,22 @@
       box-shadow: 0 10px 20px rgba(0, 247, 255, 0.3);
     }
     
+    /* Audio Button */
+    .audio-btn {
+      background: transparent;
+      border: 1px solid var(--neon-blue);
+      color: var(--neon-blue);
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Orbitron', sans-serif;
+      transition: all 0.2s;
+    }
+    
+    .audio-btn:hover {
+      background: rgba(0, 247, 255, 0.1);
+    }
+    
     /* Responsive Design */
     @media (max-width: 768px) {
       .screen h1 {
@@ -223,6 +292,11 @@
         padding: 15px;
         gap: 10px;
       }
+      
+      .touch-zone {
+        width: 100px;
+        height: 100px;
+      }
     }
   </style>
 </head>
@@ -237,25 +311,40 @@
         <span id="score" class="hud-value">0</span>
       </div>
       <div class="hud-item">
-        <span class="hud-label">Health</span>
-        <div id="health-bar" class="health-bar">
-          <div id="health-fill" class="health-fill"></div>
-        </div>
+        <span class="hud-label">Lives</span>
+        <span id="lives" class="hud-value">3</span>
       </div>
       <div class="hud-item">
         <span class="hud-label">Level</span>
         <span id="level" class="hud-value">1</span>
       </div>
       <div class="hud-item">
-        <span class="hud-label">Power</span>
-        <span id="power" class="hud-value">Normal</span>
+        <span class="hud-label">Audio</span>
+        <button id="mute-btn" class="audio-btn">ON</button>
       </div>
     </div>
     
-    <!-- Powerup Display -->
-    <div id="powerup-display"></div>
+    <!-- Boss Health Bar -->
+    <div id="boss-health-container">
+      <div class="hud-label">BOSS HEALTH</div>
+      <div class="health-bar">
+        <div id="boss-health" class="health-fill" style="width: 100%"></div>
+      </div>
+    </div>
     
-    <!-- Start Screen with Animated Background -->
+    <!-- Power-up Display -->
+    <div id="powerup-display" class="powerup-notification">
+      <span id="active-powerup"></span>
+      <div id="powerup-timer" class="powerup-timer"></div>
+    </div>
+    
+    <!-- Touch Controls (Mobile) -->
+    <div id="touch-controls">
+      <div id="move-joystick" class="touch-zone"></div>
+      <div id="shoot-button" class="touch-zone"></div>
+    </div>
+    
+    <!-- Start Screen -->
     <div id="start-screen" class="screen">
       <h1>Neon Tempest</h1>
       <div class="controls-info">
@@ -264,16 +353,14 @@
         <p>P: Pause | M: Mute</p>
       </div>
       <button id="start-btn" class="btn">Start Game</button>
-      
-      <!-- Three.js background animation -->
       <div id="title-background" style="position: absolute; width: 100%; height: 100%; z-index: -1;"></div>
     </div>
     
     <!-- Game Over Screen -->
-    <div id="game-over" class="screen">
+    <div id="game-over-screen" class="screen">
       <h1>Game Over</h1>
       <div class="score-display">
-        <p>Final Score: <span id="final-score">0</span></p>
+        <p>Final Score: <span id="game-over-score">0</span></p>
         <p>High Score: <span id="high-score">0</span></p>
       </div>
       <button id="restart-btn" class="btn">Play Again</button>
@@ -294,8 +381,9 @@
 
   <!-- Three.js and Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/postprocessing/UnrealBloomPass.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
   
   <!-- Main Game Script -->
