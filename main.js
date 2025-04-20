@@ -628,3 +628,18 @@ window.addEventListener('resize', () => {
         gameState.composer.setSize(window.innerWidth, window.innerHeight);
     }
 });
+function animate() {
+  // Only run if game is active and not paused
+  if (!gameState.gameActive || gameState.gamePaused) return;
+  
+  requestAnimationFrame(animate);
+  
+  // Basic rendering
+  renderer.render(scene, camera);
+  
+  // Add your game logic here:
+  // - Update player
+  // - Update enemies
+  // - Check collisions
+  // etc...
+}
