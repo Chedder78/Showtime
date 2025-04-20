@@ -1,264 +1,302 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Space Shooter</title>
-    <style>
-        body { 
-            margin: 0;
-            overflow: hidden;
-            background: #000;
-            font-family: Arial;
-            touch-action: manipulation;
-        }
-        #gameCanvas {
-            display: block;
-            margin: 0 auto;
-            background: #111;
-        }
-        #hud {
-            color: white;
-            padding: 10px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            font-size: 18px;
-        }
-        #mobileControls {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            display: none;
-            justify-content: space-between;
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
-        .mobile-btn {
-            width: 80px;
-            height: 80px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-            user-select: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Tempest Ultra</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500&display=swap" rel="stylesheet">
+  <style>
+    /* Base Styles with Cyberpunk Theme */
+    :root {
+      --neon-blue: #00f7ff;
+      --neon-pink: #ff00f7;
+      --neon-purple: #9d00ff;
+      --dark-bg: #0a0a1a;
+      --hud-bg: rgba(10, 10, 26, 0.8);
+    }
+    
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: var(--dark-bg);
+      font-family: 'Orbitron', sans-serif;
+      color: white;
+    }
+    
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    /* Three.js Canvas Effects */
+    canvas {
+      display: block;
+      filter: 
+        brightness(1.1)
+        contrast(1.2)
+        drop-shadow(0 0 10px var(--neon-blue));
+    }
+    
+    /* HUD with Glass Morphism */
+    #hud {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 100;
+      background: var(--hud-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
+    }
+    
+    .hud-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .hud-label {
+      color: var(--neon-blue);
+      text-shadow: 0 0 8px var(--neon-blue);
+      font-size: 16px;
+      min-width: 80px;
+      letter-spacing: 1px;
+    }
+    
+    .hud-value {
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 0 5px white;
+    }
+    
+    /* Health Bar with Animation */
+    .health-bar {
+      width: 120px;
+      height: 12px;
+      background: rgba(255, 0, 0, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 0, 0, 0.5);
+    }
+    
+    .health-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff0000, #ff5e00);
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px #ff0000;
+    }
+    
+    /* Powerup Display with Pulsing Effect */
+    #powerup-display {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      animation: pulse 1.5s infinite alternate;
+      z-index: 100;
+    }
+    
+    @keyframes pulse {
+      from { opacity: 0.7; }
+      to { opacity: 1; }
+    }
+    
+    /* Screen Overlays with CRT Effect */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(10, 10, 26, 0.9) 0%,
+        rgba(10, 10, 26, 0.95) 100%
+      );
+      z-index: 200;
+      font-family: 'Rajdhani', sans-serif;
+      text-align: center;
+      /* CRT scanline effect */
+      background-image: 
+        linear-gradient(
+          rgba(0, 247, 255, 0.03) 1px,
+          transparent 1px
+        );
+      background-size: 100% 2px;
+    }
+    
+    .screen::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(
+          rgba(0, 247, 255, 0.05) 50%,
+          transparent 50%
+        );
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+    
+    .screen h1 {
+      font-size: 4rem;
+      margin-bottom: 30px;
+      background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 20px rgba(0, 247, 255, 0.5);
+      letter-spacing: 3px;
+    }
+    
+    /* Buttons with Hover Effects */
+    .btn {
+      background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+      transition: all 0.4s ease;
+      z-index: -1;
+    }
+    
+    .btn:hover::before {
+      left: 0;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 247, 255, 0.3);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .screen h1 {
+        font-size: 2.5rem;
+      }
+      
+      .btn {
+        padding: 12px 30px;
+        font-size: 1rem;
+      }
+      
+      #hud {
+        padding: 15px;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div id="game-container">
+    <!-- Three.js canvas will be inserted here -->
+    
+    <!-- Enhanced HUD -->
     <div id="hud">
-        SCORE: <span id="score">0</span> | 
-        LIVES: <span id="lives">3</span>
+      <div class="hud-item">
+        <span class="hud-label">Score</span>
+        <span id="score" class="hud-value">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Health</span>
+        <div id="health-bar" class="health-bar">
+          <div id="health-fill" class="health-fill"></div>
+        </div>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Level</span>
+        <span id="level" class="hud-value">1</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Power</span>
+        <span id="power" class="hud-value">Normal</span>
+      </div>
     </div>
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
-    <div id="mobileControls">
-        <div class="mobile-btn" id="leftBtn">←</div>
-        <div class="mobile-btn" id="shootBtn">⚡</div>
-        <div class="mobile-btn" id="rightBtn">→</div>
+    
+    <!-- Powerup Display -->
+    <div id="powerup-display"></div>
+    
+    <!-- Start Screen with Animated Background -->
+    <div id="start-screen" class="screen">
+      <h1>Neon Tempest</h1>
+      <div class="controls-info">
+        <p>WASD/Arrows: Move</p>
+        <p>SPACE: Shoot</p>
+        <p>P: Pause | M: Mute</p>
+      </div>
+      <button id="start-btn" class="btn">Start Game</button>
+      
+      <!-- Three.js background animation -->
+      <div id="title-background" style="position: absolute; width: 100%; height: 100%; z-index: -1;"></div>
     </div>
+    
+    <!-- Game Over Screen -->
+    <div id="game-over" class="screen">
+      <h1>Game Over</h1>
+      <div class="score-display">
+        <p>Final Score: <span id="final-score">0</span></p>
+        <p>High Score: <span id="high-score">0</span></p>
+      </div>
+      <button id="restart-btn" class="btn">Play Again</button>
+    </div>
+    
+    <!-- Level Transition -->
+    <div id="level-start" class="screen">
+      <h1>Level <span id="level-display">1</span></h1>
+      <p id="level-message">Prepare for battle!</p>
+    </div>
+    
+    <!-- Pause Menu -->
+    <div id="pause-menu" class="screen">
+      <h1>Paused</h1>
+      <button id="resume-btn" class="btn">Resume</button>
+    </div>
+  </div>
 
-    <script>
-        // Game Config
-        const CONFIG = {
-            PLAYER_SPEED: 5,
-            BULLET_SPEED: 10,
-            ENEMY_SPAWN_RATE: 1000,
-            POWERUP_CHANCE: 0.1
-        };
-
-        // Game Elements
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const livesElement = document.getElementById('lives');
-        const mobileControls = document.getElementById('mobileControls');
-
-        // Touch Device Detection
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        if (isTouchDevice) mobileControls.style.display = 'flex';
-
-        // Game State
-        let score = 0;
-        let lives = 3;
-        let gameOver = false;
-        let lastEnemySpawn = 0;
-        let lastShot = 0;
-
-        // Player
-        const player = {
-            x: canvas.width / 2 - 25,
-            y: canvas.height - 60,
-            width: 50,
-            height: 50,
-            color: '#00FFFF',
-            speed: CONFIG.PLAYER_SPEED,
-            bullets: []
-        };
-
-        // Enemies
-        const enemies = [];
-        const enemyBullets = [];
-
-        // Input
-        const keys = {
-            ArrowLeft: false,
-            ArrowRight: false,
-            Space: false
-        };
-
-        // Event Listeners
-        window.addEventListener('keydown', (e) => {
-            if (['ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) keys[e.code] = true;
-        });
-        
-        window.addEventListener('keyup', (e) => {
-            if (['ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) keys[e.code] = false;
-        });
-
-        // Mobile Controls
-        if (isTouchDevice) {
-            document.getElementById('leftBtn').addEventListener('touchstart', () => keys.ArrowLeft = true);
-            document.getElementById('leftBtn').addEventListener('touchend', () => keys.ArrowLeft = false);
-            document.getElementById('rightBtn').addEventListener('touchstart', () => keys.ArrowRight = true);
-            document.getElementById('rightBtn').addEventListener('touchend', () => keys.ArrowRight = false);
-            document.getElementById('shootBtn').addEventListener('touchstart', () => keys.Space = true);
-            document.getElementById('shootBtn').addEventListener('touchend', () => keys.Space = false);
-        }
-
-        // Game Functions
-        function drawRect(x, y, width, height, color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(x, y, width, height);
-        }
-
-        function shoot() {
-            const now = Date.now();
-            if (now - lastShot > 300) { // Cooldown
-                player.bullets.push({
-                    x: player.x + player.width / 2 - 2,
-                    y: player.y,
-                    width: 4,
-                    height: 10,
-                    color: '#00FF00'
-                });
-                lastShot = now;
-            }
-        }
-
-        function spawnEnemy() {
-            enemies.push({
-                x: Math.random() * (canvas.width - 40),
-                y: -40,
-                width: 40,
-                height: 40,
-                color: '#FF0000',
-                speed: 2 + Math.random() * 2
-            });
-        }
-
-        function update() {
-            if (gameOver) return;
-
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Player movement
-            if (keys.ArrowLeft) player.x = Math.max(0, player.x - player.speed);
-            if (keys.ArrowRight) player.x = Math.min(canvas.width - player.width, player.x + player.speed);
-            if (keys.Space) shoot();
-
-            // Draw player
-            drawRect(player.x, player.y, player.width, player.height, player.color);
-
-            // Enemy spawning
-            if (Date.now() - lastEnemySpawn > CONFIG.ENEMY_SPAWN_RATE) {
-                spawnEnemy();
-                lastEnemySpawn = Date.now();
-            }
-
-            // Update bullets
-            updateBullets();
-            updateEnemies();
-            checkCollisions();
-            updateHUD();
-
-            requestAnimationFrame(update);
-        }
-
-        function updateBullets() {
-            // Player bullets
-            for (let i = player.bullets.length - 1; i >= 0; i--) {
-                const bullet = player.bullets[i];
-                bullet.y -= CONFIG.BULLET_SPEED;
-                drawRect(bullet.x, bullet.y, bullet.width, bullet.height, bullet.color);
-                
-                if (bullet.y < 0) {
-                    player.bullets.splice(i, 1);
-                }
-            }
-        }
-
-        function updateEnemies() {
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const enemy = enemies[i];
-                enemy.y += enemy.speed;
-                drawRect(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
-                
-                if (enemy.y > canvas.height) {
-                    enemies.splice(i, 1);
-                }
-            }
-        }
-
-        function checkCollisions() {
-            // Bullet-enemy collisions
-            for (let i = player.bullets.length - 1; i >= 0; i--) {
-                const bullet = player.bullets[i];
-                
-                for (let j = enemies.length - 1; j >= 0; j--) {
-                    const enemy = enemies[j];
-                    
-                    if (bullet.x < enemy.x + enemy.width &&
-                        bullet.x + bullet.width > enemy.x &&
-                        bullet.y < enemy.y + enemy.height &&
-                        bullet.y + bullet.height > enemy.y) {
-                        
-                        player.bullets.splice(i, 1);
-                        enemies.splice(j, 1);
-                        score += 10;
-                        break;
-                    }
-                }
-            }
-
-            // Player-enemy collisions
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const enemy = enemies[i];
-                
-                if (player.x < enemy.x + enemy.width &&
-                    player.x + player.width > enemy.x &&
-                    player.y < enemy.y + enemy.height &&
-                    player.y + player.height > enemy.y) {
-                    
-                    enemies.splice(i, 1);
-                    lives--;
-                    
-                    if (lives <= 0) {
-                        gameOver = true;
-                        alert(`Game Over! Score: ${score}`);
-                    }
-                }
-            }
-        }
-
-        function updateHUD() {
-            scoreElement.textContent = score;
-            livesElement.textContent = lives;
-        }
-
-        // Start game
-        update();
-    </script>
+  <!-- Three.js and Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
