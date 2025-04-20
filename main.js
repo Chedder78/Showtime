@@ -253,6 +253,45 @@ function createBullet(position, direction, isPlayer = true) {
         enemyBullets.push(bullet);
     }
 }
+// Enhanced explosion effect
+function createExplosion(position, color = 0xff9900, size = 1) {
+  const particles = new THREE.Group();
+  const particleCount = 30;
+  
+  for (let i = 0; i < particleCount; i++) {
+    const pGeo = new THREE.SphereGeometry(0.1 * size);
+    const pMat = new THREE.MeshBasicMaterial({ color });
+    const particle = new THREE.Mesh(pGeo, pMat);
+    
+    particle.position.copy(position);
+    particle.userData = {
+      velocity: new THREE.Vector3(
+        (Math.random() - 0.5) * 5 * size,
+        (Math.random() - 0.5) * 5 * size,
+        (Math.random() - 0.5) * 5 * size
+      ),
+      lifetime: 0
+    };
+    
+    particles.add(particle);
+  }
+
+  scene.add(particles);
+  
+  // Animate particles
+  const particleAnim = setInterval(() => {
+    particles.children.forEach(p => {
+      p.position.add(p.userData.velocity.clone().multiplyScalar(0.1));
+      p.userData.lifetime += 0.1;
+      p.material.opacity = 1 - (p.userData.lifetime / 2);
+    });
+    
+    if (particles.children[0]?.userData.lifetime > 2) {
+      clearInterval(particleAnim);
+      scene.remove(particles);
+    }
+  }, 16);
+}
 
 function spawnPowerUp(position) {
     const types = ['SPREAD', 'LASER', 'SHIELD'];
@@ -514,7 +553,51 @@ function nextLevel() {
     // Show level transition
     setTimeout(() => {
         spawnEnemiesForLevel(currentLevel);
-    }, 1000);
+ // Add to spawnEnemiesForLevel():
+function spawnBoss(level) {
+  const boss = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(3),
+    new THREE.MeshPhongMaterial({ 
+      color: 0xff00ff,
+      emissive: 0x9900cc 
+    })
+  );
+
+  boss.position.set(0, 15, 0);
+  boss.userData = {
+    health: level * 5,
+    attackPattern: 'spiral',
+    lastAttack: 0,
+    attackCooldown: 2000
+  };
+
+  enemies.push(boss);
+  scene.add(boss);
+
+  // Boss attack logic
+  setInterval(() => {
+    if (!gameActive) return;
+    
+    const now = Date.now();
+    if (now - boss.userData.lastAttack > boss.userData.attackCooldown) {
+      if (boss.userData.attackPattern === 'spiral') {
+        for (let i = 0; i < 8; i++) {
+          setTimeout(() => {
+            const angle = (i / 8) * Math.PI * 2;
+            const dir = new THREE.Vector3(
+              Math.sin(angle),
+              -1,
+              Math.cos(angle)
+            ).normalize();
+            createBullet(boss.position.clone(), dir, false);
+          }, i * 100);
+        }
+      }
+      boss.userData.lastAttack = now;
+    }
+  }, 100);
+}   }, 1000);
+
 }
 
 function gameOver() {
@@ -522,6 +605,18 @@ function gameOver() {
     sounds.music.stop();
     finalScoreElement.textContent = score;
     gameOverElement.style.display = 'block';
+    // Add to gameOver():
+function saveHighScore() {
+  const storedHigh = localStorage.getItem('tempestHighScore') || 0;
+  if (score > storedHigh) {
+    localStorage.setItem('tempestHighScore', score);
+    return score;
+  }
+  return storedHigh;
+}
+
+// Add to startGame():
+highScore = localStorage.getItem('tempestHighScore') || 0;
 }
 
 function updateHUD() {
