@@ -1,600 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Drone-Style 3D Asteroids</title>
-    <style>
-        body { 
-            margin: 0;
-            overflow: hidden;
-            background: #000;
-            touch-action: none;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-        }
-        canvas { 
-            display: block; 
-            width: 100%;
-            height: 100%;
-        }
-        #ui {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-family: Arial, sans-serif;
-            font-size: 18px;
-            text-shadow: 0 0 5px black;
-            pointer-events: none;
-            z-index: 100;
-        }
-        .joystick-container {
-            position: fixed;
-            bottom: 20px;
-            width: 100%;
-            height: 150px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 100;
-        }
-        .joystick {
-            width: 120px;
-            height: 120px;
-            position: relative;
-        }
-        .joystick-base {
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            position: absolute;
-        }
-        .joystick-thumb {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            touch-action: none;
-        }
-        .fire-btn {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 50, 50, 0.5);
-            border-radius: 50%;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .joystick-label {
-            position: absolute;
-            top: -25px;
-            width: 100%;
-            text-align: center;
-            color: white;
-            font-size: 14px;
-        }
-        #orientation-warning {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            text-align: center;
-            padding: 20px;
-            z-index: 200;
-        }
-        #start-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 300;
-        }
-        #start-btn {
-            margin-top: 30px;
-            padding: 15px 30px;
-            background: #44aaff;
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        @media (orientation: portrait) {
-            #orientation-warning {
-                display: flex;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Neon Tempest</title>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background-color: #000;
+      font-family: 'Courier New', monospace;
+    }
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #0ff;
+      font-size: 18px;
+      text-shadow: 0 0 5px #0ff;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #0ff;
+      z-index: 100;
+    }
+    #game-over, #level-start {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #f0f;
+      font-size: 48px;
+      text-align: center;
+      text-shadow: 0 0 10px #f0f;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #f0f;
+      display: none;
+      z-index: 200;
+    }
+    #restart-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #00f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    #restart-btn:hover {
+      background-color: #0af;
+      box-shadow: 0 0 10px #0af;
+    }
+    #controls {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: #0f0;
+      font-size: 14px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #0f0;
+      z-index: 100;
+    }
+    #pause-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff0;
+      font-size: 36px;
+      text-align: center;
+      text-shadow: 0 0 10px #ff0;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #ff0;
+      display: none;
+      z-index: 200;
+    }
+  </style>
 </head>
 <body>
-    <div id="ui">SCORE: <span id="score">0</span> | LIVES: <span id="lives">3</span></div>
+  <div id="game-container">
+    <!-- Three.js will create canvas here -->
     
-    <div class="joystick-container">
-        <!-- Left Joystick (Throttle/Yaw) -->
-        <div class="joystick" id="throttle-joystick">
-            <div class="joystick-label">THROTTLE/YAW</div>
-            <div class="joystick-base"></div>
-            <div class="joystick-thumb" id="throttle-thumb"></div>
-            <div class="fire-btn" id="left-fire">FIRE</div>
-        </div>
-        
-        <!-- Right Joystick (Pitch/Roll) -->
-        <div class="joystick" id="move-joystick">
-            <div class="joystick-label">PITCH/ROLL</div>
-            <div class="joystick-base"></div>
-            <div class="joystick-thumb" id="move-thumb"></div>
-            <div class="fire-btn" id="right-fire">FIRE</div>
-        </div>
+    <div id="hud">
+      Score: <span id="score">0</span><br>
+      High Score: <span id="high-score">0</span><br>
+      Health: <span id="health">100</span><br>
+      Lives: <span id="lives">3</span><br>
+      Level: <span id="level">1</span><br>
+      Enemies: <span id="enemies">0</span>
     </div>
     
-    <div id="orientation-warning">
-        Please rotate your device to landscape mode for the best experience
+    <div id="game-over">
+      GAME OVER<br>
+      Final Score: <span id="final-score">0</span><br>
+      <button id="restart-btn">Play Again</button>
     </div>
-    <div id="start-screen">
-        <h1>DRONE-STYLE 3D ASTEROIDS</h1>
-        <p>Left stick: Up/Down = Throttle | Left/Right = Yaw (spin)</p>
-        <p>Right stick: Up/Down = Pitch | Left/Right = Roll</p>
-        <p>Fire buttons: Shoot asteroids</p>
-        <button id="start-btn">START GAME</button>
+    
+    <div id="level-start">
+      LEVEL <span id="level-display">1</span><br>
+      <span id="level-message">Prepare for battle!</span>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script>
-        // Game setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
-
-        // Mobile performance optimizations
-        renderer.domElement.style.width = '100%';
-        renderer.domElement.style.height = '100%';
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0x333333);
-        scene.add(ambientLight);
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(0, 0, 1);
-        scene.add(directionalLight);
-
-        // Space background
-        const starsGeometry = new THREE.BufferGeometry();
-        const starCount = 2000;
-        const positions = new Float32Array(starCount * 3);
-        
-        for (let i = 0; i < starCount; i++) {
-            const i3 = i * 3;
-            positions[i3] = (Math.random() - 0.5) * 2000;
-            positions[i3 + 1] = (Math.random() - 0.5) * 2000;
-            positions[i3 + 2] = (Math.random() - 0.5) * 2000;
-        }
-        
-        starsGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const starsMaterial = new THREE.PointsMaterial({ 
-            color: 0xffffff, 
-            size: 0.5,
-            sizeAttenuation: true
-        });
-        const stars = new THREE.Points(starsGeometry, starsMaterial);
-        scene.add(stars);
-
-        // Player ship (drone-like)
-        const shipGeometry = new THREE.ConeGeometry(0.5, 1.5, 3);
-        shipGeometry.rotateX(Math.PI / 2);
-        const shipMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x44aaff,
-            flatShading: true
-        });
-        const ship = new THREE.Mesh(shipGeometry, shipMaterial);
-        scene.add(ship);
-
-        // Asteroids
-        const asteroids = [];
-        const asteroidGeometry = new THREE.DodecahedronGeometry(1, 0);
-        const asteroidMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x886633,
-            flatShading: true
-        });
-
-        function createAsteroid() {
-            const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
-            
-            const pos = new THREE.Vector3(
-                (Math.random() - 0.5) * 50,
-                (Math.random() - 0.5) * 50,
-                (Math.random() - 0.5) * 50
-            );
-            asteroid.position.copy(pos);
-            
-            const scale = 0.8 + Math.random() * 1.5;
-            asteroid.scale.set(scale, scale, scale);
-            
-            asteroid.rotation.set(
-                Math.random() * Math.PI,
-                Math.random() * Math.PI,
-                Math.random() * Math.PI
-            );
-            
-            asteroid.userData = {
-                velocity: new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.1,
-                    (Math.random() - 0.5) * 0.1,
-                    (Math.random() - 0.5) * 0.1
-                ),
-                rotationSpeed: new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.01,
-                    (Math.random() - 0.5) * 0.01,
-                    (Math.random() - 0.5) * 0.01
-                )
-            };
-            
-            scene.add(asteroid);
-            asteroids.push(asteroid);
-            return asteroid;
-        }
-
-        // Bullets
-        const bullets = [];
-        const bulletGeometry = new THREE.SphereGeometry(0.2, 8, 8);
-        const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-
-        // Game state
-        let score = 0;
-        let lives = 3;
-        let gameOver = false;
-        let gameStarted = false;
-        
-        // Drone physics
-        const physics = {
-            position: new THREE.Vector3(),
-            velocity: new THREE.Vector3(),
-            rotation: new THREE.Euler(),
-            thrust: 0,
-            maxSpeed: 0.3,
-            throttleSpeed: 0.001,
-            rotationSpeed: 0.02,
-            pitch: 0,
-            roll: 0,
-            yaw: 0
-        };
-
-        let lastShot = 0;
-        const shotDelay = 300;
-
-        // Joystick controls
-        const throttleJoystick = {
-            active: false,
-            x: 0, // Yaw (left/right rotation)
-            y: 0, // Throttle (up/down)
-            element: document.getElementById('throttle-thumb'),
-            base: document.getElementById('throttle-joystick')
-        };
-
-        const moveJoystick = {
-            active: false,
-            x: 0, // Roll (left/right tilt)
-            y: 0, // Pitch (forward/back tilt)
-            element: document.getElementById('move-thumb'),
-            base: document.getElementById('move-joystick')
-        };
-
-        // Initialize joysticks
-        function setupJoystick(joystick) {
-            const rect = joystick.base.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const maxDist = rect.width / 3;
-
-            function moveThumb(clientX, clientY) {
-                const dx = clientX - centerX;
-                const dy = clientY - centerY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const angle = Math.atan2(dy, dx);
-                
-                const limitedDist = Math.min(dist, maxDist);
-                const x = limitedDist * Math.cos(angle);
-                const y = limitedDist * Math.sin(angle);
-                
-                joystick.element.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-                
-                // Normalized values (-1 to 1)
-                joystick.x = x / maxDist;
-                joystick.y = y / maxDist;
-            }
-
-            function handleStart(e) {
-                e.preventDefault();
-                joystick.active = true;
-                moveThumb(e.touches[0].clientX, e.touches[0].clientY);
-            }
-
-            function handleMove(e) {
-                e.preventDefault();
-                if (joystick.active) {
-                    moveThumb(e.touches[0].clientX, e.touches[0].clientY);
-                }
-            }
-
-            function handleEnd() {
-                joystick.active = false;
-                joystick.element.style.transform = 'translate(-50%, -50%)';
-                joystick.x = 0;
-                joystick.y = 0;
-            }
-
-            joystick.base.addEventListener('touchstart', handleStart);
-            document.addEventListener('touchmove', handleMove);
-            document.addEventListener('touchend', handleEnd);
-        }
-
-        setupJoystick(throttleJoystick);
-        setupJoystick(moveJoystick);
-
-        // Fire buttons
-        document.getElementById('left-fire').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if(gameStarted) shoot();
-        });
-        document.getElementById('right-fire').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if(gameStarted) shoot();
-        });
-
-        // Start button
-        document.getElementById('start-btn').addEventListener('click', startGame);
-
-        // Handle window resize
-        function handleResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-        
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange', handleResize);
-
-        // Game loop
-        function gameLoop() {
-            if (gameOver || !gameStarted) return;
-            
-            requestAnimationFrame(gameLoop);
-            
-            // Apply drone physics based on joystick input
-            
-            // Left stick: Throttle (Y) and Yaw (X)
-            physics.thrust = throttleJoystick.y * physics.throttleSpeed;
-            physics.yaw = throttleJoystick.x * physics.rotationSpeed;
-            
-            // Right stick: Pitch (Y) and Roll (X)
-            physics.pitch = moveJoystick.y * physics.rotationSpeed;
-            physics.roll = moveJoystick.x * physics.rotationSpeed;
-            
-            // Update rotation
-            ship.rotation.x += physics.pitch;
-            ship.rotation.z += physics.roll;
-            ship.rotation.y += physics.yaw;
-            
-            // Calculate forward vector based on ship rotation
-            const forward = new THREE.Vector3(0, 0, -1);
-            forward.applyQuaternion(ship.quaternion);
-            
-            // Apply movement forces
-            physics.velocity.add(forward.multiplyScalar(physics.thrust));
-            
-            // Limit speed
-            if (physics.velocity.length() > physics.maxSpeed) {
-                physics.velocity.normalize().multiplyScalar(physics.maxSpeed);
-            }
-            
-            // Apply some drag
-            physics.velocity.multiplyScalar(0.98);
-            
-            // Update position
-            ship.position.add(physics.velocity);
-            
-            // Keep ship in bounds
-            ['x', 'y', 'z'].forEach(axis => {
-                if (Math.abs(ship.position[axis]) > 50) {
-                    ship.position[axis] = Math.sign(ship.position[axis]) * 50;
-                    physics.velocity[axis] *= -0.5; // Bounce off boundaries
-                }
-            });
-            
-            // Update asteroids
-            asteroids.forEach(asteroid => {
-                asteroid.position.add(asteroid.userData.velocity);
-                asteroid.rotation.x += asteroid.userData.rotationSpeed.x;
-                asteroid.rotation.y += asteroid.userData.rotationSpeed.y;
-                asteroid.rotation.z += asteroid.userData.rotationSpeed.z;
-                
-                // Wrap around play area
-                ['x', 'y', 'z'].forEach(axis => {
-                    if (Math.abs(asteroid.position[axis]) > 50) {
-                        asteroid.position[axis] = -asteroid.position[axis] * 0.9;
-                    }
-                });
-            });
-            
-            // Update bullets
-            bullets.forEach((bullet, index) => {
-                // Move bullet in direction ship is facing
-                const direction = new THREE.Vector3(0, 0, -1);
-                direction.applyQuaternion(ship.quaternion);
-                direction.multiplyScalar(bulletSpeed);
-                bullet.position.add(direction);
-                
-                bullet.userData.lifetime--;
-                
-                // Remove old bullets
-                if (bullet.userData.lifetime <= 0 || 
-                    Math.abs(bullet.position.x) > 50 || 
-                    Math.abs(bullet.position.y) > 50 || 
-                    Math.abs(bullet.position.z) > 50) {
-                    scene.remove(bullet);
-                    bullets.splice(index, 1);
-                }
-                
-                // Check collisions
-                asteroids.forEach((asteroid, aIndex) => {
-                    if (bullet.position.distanceTo(asteroid.position) < asteroid.scale.x + 0.3) {
-                        // Hit!
-                        score += Math.floor(100 / asteroid.scale.x);
-                        document.getElementById('score').textContent = score;
-                        
-                        // Split asteroid if large enough
-                        if (asteroid.scale.x > 1) {
-                            for (let i = 0; i < 2; i++) {
-                                const newAsteroid = createAsteroid();
-                                newAsteroid.position.copy(asteroid.position);
-                                newAsteroid.scale.setScalar(asteroid.scale.x * 0.7);
-                                newAsteroid.userData.velocity = new THREE.Vector3(
-                                    (Math.random() - 0.5) * 0.2,
-                                    (Math.random() - 0.5) * 0.2,
-                                    (Math.random() - 0.5) * 0.2
-                                );
-                            }
-                        }
-                        
-                        // Remove bullet and asteroid
-                        scene.remove(bullet);
-                        bullets.splice(index, 1);
-                        scene.remove(asteroid);
-                        asteroids.splice(aIndex, 1);
-                        
-                        // Create new asteroid
-                        createAsteroid();
-                    }
-                });
-            });
-            
-            // Check ship collisions
-            asteroids.forEach(asteroid => {
-                if (ship.position.distanceTo(asteroid.position) < asteroid.scale.x + 1) {
-                    lives--;
-                    document.getElementById('lives').textContent = lives;
-                    
-                    if (lives <= 0) {
-                        gameOver = true;
-                        document.getElementById('start-screen').style.display = 'flex';
-                        document.getElementById('start-screen').innerHTML = `
-                            <h1>GAME OVER</h1>
-                            <p>Final Score: ${score}</p>
-                            <button id="restart-btn">PLAY AGAIN</button>
-                        `;
-                        document.getElementById('restart-btn').addEventListener('click', restartGame);
-                    } else {
-                        // Reset position after hit
-                        ship.position.set(0, 0, 0);
-                        physics.velocity.set(0, 0, 0);
-                        ship.rotation.set(0, 0, 0);
-                    }
-                }
-            });
-            
-            // Update camera to follow ship
-            camera.position.copy(ship.position);
-            camera.position.z += 10;
-            camera.lookAt(ship.position);
-            
-            renderer.render(scene, camera);
-        }
-
-        function shoot() {
-            if (Date.now() - lastShot < shotDelay) return;
-            
-            const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-            bullet.position.copy(ship.position);
-            
-            bullet.userData = {
-                lifetime: 100
-            };
-            
-            scene.add(bullet);
-            bullets.push(bullet);
-            lastShot = Date.now();
-        }
-
-        function startGame() {
-            document.getElementById('start-screen').style.display = 'none';
-            gameStarted = true;
-            gameOver = false;
-            score = 0;
-            lives = 3;
-            document.getElementById('score').textContent = score;
-            document.getElementById('lives').textContent = lives;
-            
-            // Reset physics
-            physics.velocity.set(0, 0, 0);
-            physics.thrust = 0;
-            physics.pitch = 0;
-            physics.roll = 0;
-            physics.yaw = 0;
-            
-            // Clear existing asteroids
-            asteroids.forEach(asteroid => scene.remove(asteroid));
-            asteroids.length = 0;
-            
-            // Clear bullets
-            bullets.forEach(bullet => scene.remove(bullet));
-            bullets.length = 0;
-            
-            // Create new asteroids
-            for (let i = 0; i < 6; i++) {
-                createAsteroid();
-            }
-            
-            // Reset ship position and rotation
-            ship.position.set(0, 0, 0);
-            ship.rotation.set(0, 0, 0);
-            
-            // Reset camera
-            camera.position.set(0, 0, 10);
-            camera.lookAt(0, 0, 0);
-            
-            // Start game loop
-            gameLoop();
-        }
-
-        function restartGame() {
-            startGame();
-        }
-
-        // Initial asteroid creation
-        for (let i = 0; i < 6; i++) {
-            createAsteroid();
-        }
-    </script>
+    
+    <div id="pause-menu">
+      PAUSED<br>
+      <button id="resume-btn">Resume</button>
+    </div>
+    
+    <div id="controls">
+      WASD/Arrows: Move<br>
+      Space: Shoot<br>
+      P: Pause<br>
+      M: Toggle Mute
+    </div>
+  </div>
+  
+  <!-- Three.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <!-- OrbitControls for debugging -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+  <!-- GLTFLoader for 3D models (optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+  
+  <script src="./main.js"></script>
 </body>
 </html>
