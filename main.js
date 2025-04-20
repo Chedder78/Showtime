@@ -1,3 +1,21 @@
+// FORCE GAME TO START (TEMPORARY FIX)
+setTimeout(() => {
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.style.display = 'none';
+  });
+  
+  // Force-start the game
+  gameState.gameActive = true;
+  gameState.gamePaused = false;
+  
+  // Start animation loop
+  if (!gameState.animationRunning) {
+    gameState.animationRunning = true;
+    animate();
+  }
+}, 1000); // 1 second delay to override everything
+
 // SIMPLE FIX - ADD THESE 3 LINES AT THE TOP
 document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
 document.getElementById('start-screen').style.display = 'flex';
