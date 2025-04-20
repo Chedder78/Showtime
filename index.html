@@ -1,140 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Neon Tempest</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Tempest Ultra</title>
   <style>
-    body { 
-      margin: 0; 
-      overflow: hidden; 
-      background-color: #000;
-      font-family: 'Courier New', monospace;
-    }
-    #game-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-    }
-    #hud {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: #0ff;
-      font-size: 18px;
-      text-shadow: 0 0 5px #0ff;
-      background-color: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #0ff;
-      z-index: 100;
-    }
-    #game-over, #level-start {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #f0f;
-      font-size: 48px;
-      text-align: center;
-      text-shadow: 0 0 10px #f0f;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 20px;
-      border-radius: 10px;
-      border: 2px solid #f0f;
-      display: none;
-      z-index: 200;
-    }
-    #restart-btn {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #00f;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-family: 'Courier New', monospace;
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    #restart-btn:hover {
-      background-color: #0af;
-      box-shadow: 0 0 10px #0af;
-    }
-    #controls {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      color: #0f0;
-      font-size: 14px;
-      background-color: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #0f0;
-      z-index: 100;
-    }
-    #pause-menu {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #ff0;
-      font-size: 36px;
-      text-align: center;
-      text-shadow: 0 0 10px #ff0;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 20px;
-      border-radius: 10px;
-      border: 2px solid #ff0;
-      display: none;
-      z-index: 200;
-    }
+    body { margin: 0; overflow: hidden; background: #000; }
+    #game-container { position: relative; width: 100vw; height: 100vh; }
+    #hud { position: absolute; top: 10px; left: 10px; color: #0ff; font-family: 'Courier New', monospace; }
+    #game-over, #level-start { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    #powerup-display { position: absolute; bottom: 10px; right: 10px; color: #0f0; }
   </style>
 </head>
 <body>
   <div id="game-container">
-    <!-- Three.js will create canvas here -->
-    
+    <!-- Three.js injects canvas here -->
     <div id="hud">
-      Score: <span id="score">0</span><br>
-      High Score: <span id="high-score">0</span><br>
-      Health: <span id="health">100</span><br>
-      Lives: <span id="lives">3</span><br>
-      Level: <span id="level">1</span><br>
-      Enemies: <span id="enemies">0</span>
+      SCORE: <span id="score">0</span> | 
+      HEALTH: <span id="health">100</span> | 
+      LEVEL: <span id="level">1</span> | 
+      POWER: <span id="power">NORMAL</span>
     </div>
-    
-    <div id="game-over">
-      GAME OVER<br>
-      Final Score: <span id="final-score">0</span><br>
-      <button id="restart-btn">Play Again</button>
-    </div>
-    
-    <div id="level-start">
-      LEVEL <span id="level-display">1</span><br>
-      <span id="level-message">Prepare for battle!</span>
-    </div>
-    
-    <div id="pause-menu">
-      PAUSED<br>
-      <button id="resume-btn">Resume</button>
-    </div>
-    
-    <div id="controls">
-      WASD/Arrows: Move<br>
-      Space: Shoot<br>
-      P: Pause<br>
-      M: Toggle Mute
+    <div id="powerup-display"></div>
+    <div id="game-over" style="display: none;">
+      <h1>GAME OVER</h1>
+      <button id="restart-btn">TRY AGAIN</button>
     </div>
   </div>
-  
-  <!-- Three.js library -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-  <!-- OrbitControls for debugging -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-  <!-- GLTFLoader for 3D models (optional) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
   <script src="./main.js"></script>
 </body>
 </html>
