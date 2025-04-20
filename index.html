@@ -646,3 +646,279 @@ function animate(currentTime) {
     
     // ... rest of your animation code ...
 }
+        // Post-processing setup for advanced effects
+function initPostProcessing() {
+  const renderScene = new RenderPass(gameState.scene, gameState.camera);
+  const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    1.2, // strength
+    0.4, // radius
+    0.8  // threshold
+  );
+  
+  const composer = new EffectComposer(gameState.renderer);
+  composer.addPass(renderScene);
+  composer.addPass(bloomPass);
+  
+  return composer;
+}
+
+// Enhanced tunnel with procedural textures
+function createTunnel() {
+  // Main tunnel
+  const tunnelGeometry = new THREE.TorusGeometry(15, 3, 64, 200);
+  const tunnelMaterial = new THREE.MeshStandardMaterial({
+    color: 0x3300ff,
+    emissive: 0x110033,
+    emissiveIntensity: 0.5,
+    metalness: 0.8,
+    roughness: 0.3,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.7
+  });
+  
+  // Add displacement map for surface detail
+  const displacementMap = new THREE.TextureLoader().load('assets/textures/hex_pattern.png');
+  displacementMap.wrapS = displacementMap.wrapT = THREE.RepeatWrapping;
+  tunnelMaterial.displacementMap = displacementMap;
+  tunnelMaterial.displacementScale = 0.2;
+  
+  gameState.tunnel = new THREE.Mesh(tunnelGeometry, tunnelMaterial);
+  gameState.tunnel.rotation.x = Math.PI / 2;
+  gameState.scene.add(gameState.tunnel);
+
+  // Inner energy field
+  const energyField = new THREE.Mesh(
+    new THREE.TorusGeometry(14, 1.5, 32, 100),
+    new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        color1: { value: new THREE.Color(0x00ffff) },
+        color2: { value: new THREE.Color(0xff00ff) }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color1;
+        uniform vec3 color2;
+        varying vec2 vUv;
+        
+        void main() {
+          float wave = sin(vUv.x * 20.0 + time * 2.0) * 0.5 + 0.5;
+          vec3 color = mix(color1, color2, wave);
+          gl_FragColor = vec4(color, 0.7);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    })
+  );
+  energyField.rotation.x = Math.PI / 2;
+  gameState.tunnel.add(energyField);
+}
+
+// Player ship with engine trail
+function createPlayer() {
+  const geometry = new THREE.ConeGeometry(1.2, 2.5, 6);
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x00ffff,
+    emissive: 0x004444,
+    metalness: 0.7,
+    roughness: 0.3
+  });
+  
+  gameState.player = new THREE.Mesh(geometry, material);
+  gameState.player.rotation.x = Math.PI / 2;
+  gameState.player.position.set(0, -10, 0);
+  gameState.player.castShadow = true;
+  gameState.scene.add(gameState.player);
+
+  // Engine trail particle system
+  const trailGeometry = new THREE.BufferGeometry();
+  const trailCount = 50;
+  const trailPositions = new Float32Array(trailCount * 3);
+  const trailSizes = new Float32Array(trailCount);
+  
+  for (let i = 0; i < trailCount; i++) {
+    trailPositions[i * 3] = 0;
+    trailPositions[i * 3 + 1] = -1 - (i * 0.1);
+    trailPositions[i * 3 + 2] = 0;
+    trailSizes[i] = 0.5 - (i * 0.01);
+  }
+  
+  trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+  trailGeometry.setAttribute('size', new THREE.BufferAttribute(trailSizes, 1));
+  
+  const trailMaterial = new THREE.PointsMaterial({
+    color: 0x00aaff,
+    size: 0.3,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
+  });
+  
+  gameState.engineTrail = new THREE.Points(trailGeometry, trailMaterial);
+  gameState.player.add(gameState.engineTrail);
+}
+
+// Enhanced enemy explosions
+function createExplosion(pos) {
+  // Particle explosion
+  const particleCount = 100;
+  const particles = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+  const colors = new Float32Array(particleCount * 3);
+  const sizes = new Float32Array(particleCount);
+  
+  const color = new THREE.Color();
+  
+  for (let i = 0; i < particleCount; i++) {
+    positions[i * 3] = pos.x + (Math.random() - 0.5) * 3;
+    positions[i * 3 + 1] = pos.y + (Math.random() - 0.5) * 3;
+    positions[i * 3 + 2] = pos.z + (Math.random() - 0.5) * 3;
+    
+    color.setHSL(Math.random() * 0.1 + 0.05, 0.9, 0.5);
+    color.toArray(colors, i * 3);
+    
+    sizes[i] = Math.random() * 0.5 + 0.1;
+  }
+  
+  particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+  
+  const particleMaterial = new THREE.PointsMaterial({
+    size: 0.3,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true
+  });
+  
+  const particleSystem = new THREE.Points(particles, particleMaterial);
+  gameState.scene.add(particleSystem);
+  
+  // Shockwave effect
+  const shockwaveGeometry = new THREE.SphereGeometry(1, 32, 32);
+  const shockwaveMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.7,
+    wireframe: true
+  });
+  
+  const shockwave = new THREE.Mesh(shockwaveGeometry, shockwaveMaterial);
+  shockwave.position.copy(pos);
+  gameState.scene.add(shockwave);
+  
+  // Animate and remove
+  let scale = 0.1;
+  let opacity = 0.7;
+  
+  const animateExplosion = () => {
+    scale += 0.5;
+    opacity -= 0.02;
+    
+    particleSystem.position.y += 0.05;
+    particleMaterial.opacity = opacity * 0.5;
+    
+    shockwave.scale.set(scale, scale, scale);
+    shockwaveMaterial.opacity = opacity;
+    
+    if (opacity > 0) {
+      requestAnimationFrame(animateExplosion);
+    } else {
+      gameState.scene.remove(particleSystem);
+      gameState.scene.remove(shockwave);
+    }
+  };
+  
+  animateExplosion();
+}
+
+// Dynamic lighting effects
+function updateLighting() {
+  // Pulsing ambient light
+  const time = gameState.clock.getElapsedTime();
+  const intensity = 0.4 + Math.sin(time * 2) * 0.1;
+  gameState.scene.children.forEach(child => {
+    if (child instanceof THREE.AmbientLight) {
+      child.intensity = intensity;
+    }
+  });
+  
+  // Weapon charge glow
+  if (gameState.activePowerup === 'LASER') {
+    const charge = (gameState.powerupEndTime - time) / POWERUP_TYPES.LASER.duration;
+    gameState.player.children.forEach(child => {
+      if (child instanceof THREE.PointLight) {
+        child.intensity = charge * 2;
+        child.distance = 3 + charge * 2;
+      }
+    });
+  }
+}
+
+// Enhanced animate function
+function animate(currentTime) {
+  requestAnimationFrame(animate);
+  
+  // Calculate delta time for smooth animation
+  gameState.deltaTime = (currentTime - gameState.lastFrameTime) / 1000;
+  gameState.lastFrameTime = currentTime;
+  
+  if (!gameState.gameActive || gameState.gamePaused) return;
+  
+  const elapsedTime = gameState.clock.getElapsedTime();
+  
+  // Update engine trail
+  if (gameState.engineTrail) {
+    const positions = gameState.engineTrail.geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+      positions[i] = 0;
+      positions[i + 1] = -1 - (i/3 * 0.1) + Math.sin(elapsedTime * 10 + i) * 0.05;
+      positions[i + 2] = 0;
+    }
+    gameState.engineTrail.geometry.attributes.position.needsUpdate = true;
+  }
+  
+  // Update all game systems
+  updateTunnel();
+  updatePlayer(gameState.deltaTime);
+  updateEnemies(gameState.deltaTime);
+  updateBullets(gameState.deltaTime);
+  updatePowerups();
+  updateLighting();
+  checkCollisions();
+  
+  // Render with post-processing
+  if (gameState.composer) {
+    gameState.composer.render();
+  } else {
+    gameState.renderer.render(gameState.scene, gameState.camera);
+  }
+}
+
+// Initialize with post-processing
+function init() {
+  setupScene();
+  setupCamera();
+  setupRenderer();
+  createGameElements();
+  setupEventListeners();
+  
+  // Initialize post-processing after everything else
+  gameState.composer = initPostProcessing();
+  
+  showStartScreen();
+  animate();
+}
