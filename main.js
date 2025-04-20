@@ -493,7 +493,111 @@ function onKeyDown(event) {
 function onKeyUp(event) {
     keys[event.key.toLowerCase()] = false;
 }
+// Create a twisting neon tunnel
+function createTunnel() {
+  const tunnelGeometry = new THREE.TorusGeometry(15, 3, 16, 100);
+  const tunnelMaterial = new THREE.MeshBasicMaterial({ 
+    color: 0x3300ff, 
+    wireframe: true,
+    transparent: true,
+    opacity: 0.3
+  });
+  const tunnel = new THREE.Mesh(tunnelGeometry, tunnelMaterial);
+  tunnel.rotation.x = Math.PI / 2;
+  scene.add(tunnel);
+}const powerUps = {
+  SPREAD: { name: "TRIPLE SHOT", duration: 10, color: 0x00ff00 },
+  LASER: { name: "LASER BEAM", duration: 7, color: 0xff0000 },
+  SHIELD: { name: "ENERGY SHIELD", duration: 5, color: 0x0000ff }
+};
 
+function spawnPowerUp() {
+  if (Math.random() < 0.1) { // 10% chance per enemy kill
+    const type = Object.keys(powerUps)[Math.floor(Math.random() * 3)];
+    const powerUp = new THREE.Mesh(
+      new THREE.SphereGeometry(1),
+      new THREE.MeshBasicMaterial({ color: powerUps[type].color })
+    );
+    powerUp.position.set(
+      Math.random() * 20 - 10,
+      0,
+      Math.random() * 20 - 10
+    );
+    powerUp.userData = { type };
+    scene.add(powerUp);
+  }
+}function spawnBoss(level) {
+  const bossGeometry = new THREE.IcosahedronGeometry(3);
+  const bossMaterial = new THREE.MeshPhongMaterial({ 
+    color: 0xff00ff,
+    emissive: 0x9900cc
+  });
+  const boss = new THREE.Mesh(bossGeometry, bossMaterial);
+  boss.userData = {
+    health: level * 5,
+    pattern: "SPIRAL_ATTACK",
+    speed: 0.5 + (level * 0.1)
+  };
+  scene.add(boss);
+  return boss;
+}
+// Screen shake on big hits
+function screenShake(intensity = 1) {
+  const originalPos = camera.position.clone();
+  let shakeTime = 0;
+  const shakeInterval = setInterval(() => {
+    camera.position.x = originalPos.x + (Math.random() - 0.5) * intensity;
+    camera.position.y = originalPos.y + (Math.random() - 0.5) * intensity;
+    shakeTime += 0.1;
+    if (shakeTime > 0.5) clearInterval(shakeInterval);
+  }, 16);
+}
+
+// Explosion particles
+function createExplosion(pos) {
+  const particles = new THREE.Group();
+  for (let i = 0; i < 50; i++) {
+    const pGeo = new THREE.SphereGeometry(0.1);
+    const pMat = new THREE.MeshBasicMaterial({ color: 0xff9900 });
+    const particle = new THREE.Mesh(pGeo, pMat);
+    particle.position.copy(pos);
+    particle.userData.velocity = new THREE.Vector3(
+      Math.random() - 0.5,
+      Math.random() - 0.5,
+      Math.random() - 0.5
+    ).multiplyScalar(2);
+    particles.add(particle);
+  }
+  scene.add(particles);
+  setTimeout(() => scene.remove(particles), 1000);
+}const sounds = {
+  shoot: new Howl({ src: ['laser.wav'], volume: 0.5 }),
+  explode: new Howl({ src: ['explosion.wav'] }),
+  powerup: new Howl({ src: ['powerup.wav'] }),
+  music: new Howl({ 
+    src: ['synthwave.mp3'], 
+    loop: true,
+    volume: 0.7
+  })
+};
+
+// Play music when game starts
+sounds.music.play();// Mouse + Keyboard + Gamepad support
+window.addEventListener('mousemove', (e) => {
+  if (gameActive) {
+    player.position.x = (e.clientX / window.innerWidth) * 20 - 10;
+    player.position.z = (e.clientY / window.innerHeight) * 20 - 10;
+  }
+});
+
+// Gamepad support
+function checkGamepad() {
+  const gamepad = navigator.getGamepads()[0];
+  if (gamepad) {
+    player.position.x += gamepad.axes[0] * 0.5;
+    player.position.z += gamepad.axes[1] * 0.5;
+  }
+}
 // Initialize and start the game
 init();
 animate();
