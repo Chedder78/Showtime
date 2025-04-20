@@ -483,122 +483,131 @@ function gameOver() {
         gameState.highScore = gameState.score;
         localStorage.setItem('highScore', gameState.highScore);
     }
-
-    domElements.finalScoreElement.textContent = `Final Score: ${gameState.score}`;
-    domElements.highScoreElement.textContent = `High Score: ${gameState.highScore}`;
-    domElements.gameOverElement.style.display = 'flex';
+    
+    domElements.finalScoreElement.textContent = gameState.score;
+    domElements.highScoreElement.textContent = gameState.highScore;
+    domElements.gameOverElement.style.display = 'block';
     sounds.gameOver.play();
 }
 
+// UI Functions
 function updateHUD() {
-    domElements.scoreElement.textContent = `Score: ${gameState.score}`;
-    domElements.healthElement.textContent = `Health: ${gameState.health}`;
-    domElements.levelElement.textContent = `Level: ${gameState.currentLevel}`;
-    domElements.powerElement.textContent = gameState.activePowerup 
-        ? POWERUP_TYPES[gameState.activePowerup].name 
-        : "NORMAL";
+    domElements.scoreElement.textContent = gameState.score;
+    domElements.healthElement.textContent = gameState.health;
+    domElements.levelElement.textContent = gameState.currentLevel;
+}
+
+function showLevelStart() {
+    gameState.gameActive = false;
+    domElements.levelDisplayElement.textContent = gameState.currentLevel;
+    domElements.levelMessageElement.textContent = getLevelMessage(gameState.currentLevel);
+    domElements.levelStartElement.style.display = 'block';
+    sounds.levelComplete.play();
+    
+    setTimeout(() => {
+        domElements.levelStartElement.style.display = 'none';
+        gameState.gameActive = true;
+        spawnEnemiesForLevel(gameState.currentLevel);
+    }, 2000);
+}
+
+function getLevelMessage(level) {
+    const messages = [
+        "Beginner's luck?",
+        "Getting serious now",
+        "Can you handle this?",
+        "The challenge increases",
+        "No turning back now",
+        "Are you still with us?",
+        "This is getting intense",
+        "You're a true warrior",
+        "Almost there...",
+        "Final challenge!"
+    ];
+    return level <= messages.length ? messages[level - 1] : "Endless mode!";
 }
 
 function showStartScreen() {
+    hideAllScreens();
     domElements.startScreen.style.display = 'flex';
 }
 
 function hideAllScreens() {
     domElements.startScreen.style.display = 'none';
     domElements.gameOverElement.style.display = 'none';
-    domElements.pauseMenu.style.display = 'none';
     domElements.levelStartElement.style.display = 'none';
+    domElements.pauseMenu.style.display = 'none';
 }
 
-function showLevelStart() {
-    domElements.levelMessageElement.textContent = `LEVEL ${gameState.currentLevel}`;
-    domElements.levelStartElement.style.display = 'flex';
-    domElements.levelDisplayElement.textContent = `Level ${gameState.currentLevel}`;
+// Enemy Spawning
+function spawnEnemiesForLevel(level) {
+    const baseCount = 5 + level * 2;
+    const count = Math.min(baseCount, 25);
     
-    setTimeout(() => {
-        domElements.levelStartElement.style.display = 'none';
-        spawnEnemies(gameState.currentLevel);
-        sounds.levelComplete.play();
-    }, 2000);
-}
-
-function spawnEnemies(level) {
-    const count = 5 + level * 2;
     for (let i = 0; i < count; i++) {
-        const geometry = new THREE.IcosahedronGeometry(1 + Math.random(), 2);
-        const material = new THREE.MeshStandardMaterial({
-            color: 0xff4444,
-            flatShading: true
-        });
-        const enemy = new THREE.Mesh(geometry, material);
-        enemy.position.set(
-            (Math.random() * 30) - 15,
-            (Math.random() * 10) + 10,
-            (Math.random() * 30) - 15
-        );
-        enemy.userData = {
-            health: 3 + level,
-            speed: 1 + level * 0.15,
-            value: 100,
-            shootCooldown: 2 + Math.random(),
-            lastShotTime: 0,
-            size: 1.5
-        };
-        gameState.scene.add(enemy);
-        gameState.enemies.push(enemy);
+        let type;
+        const rand = Math.random();
+        
+        if (level < 3) {
+            type = 'basic';
+        } else if (level < 6) {
+            type = rand < 0.7 ? 'basic' : 'fast';
+        } else {
+            if (rand < 0.5) type = 'basic';
+            else if (rand < 0.8) type = 'fast';
+            else type = 'strong';
+        }
+        
+        createEnemy(type);
     }
 }
 
-function screenShake() {
-    const intensity = 0.2;
-    const duration = 200;
+// Effects
+function screenShake(intensity = 0.5) {
     const originalPos = gameState.camera.position.clone();
-    
+    let shakeTime = 0;
     const shakeInterval = setInterval(() => {
         gameState.camera.position.x = originalPos.x + (Math.random() - 0.5) * intensity;
-        gameState.camera.position.y = originalPos.y + (Math.random() - 0.5) * intensity;
         gameState.camera.position.z = originalPos.z + (Math.random() - 0.5) * intensity;
+        shakeTime += 0.1;
+        if (shakeTime > 0.5) clearInterval(shakeInterval);
     }, 16);
-    
-    setTimeout(() => {
-        clearInterval(shakeInterval);
-        gameState.camera.position.copy(originalPos);
-    }, duration);
 }
 
+// Event Handlers
 function setupEventListeners() {
-    window.addEventListener('keydown', (e) => {
-        keys[e.key] = true;
-        if (e.key === 'p') togglePause();
-    });
-
-    window.addEventListener('keyup', (e) => {
-        keys[e.key] = false;
-    });
-
-    domElements.startBtn.addEventListener('click', startGame);
+    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
     domElements.restartBtn.addEventListener('click', startGame);
+    domElements.startBtn.addEventListener('click', startGame);
     domElements.resumeBtn.addEventListener('click', togglePause);
 }
 
-function togglePause() {
-    if (!gameState.gameActive) return;
-
-    gameState.gamePaused = !gameState.gamePaused;
-    domElements.pauseMenu.style.display = gameState.gamePaused ? 'flex' : 'none';
-
-    if (!gameState.gamePaused) {
-        gameState.lastFrameTime = performance.now();
-        animate();
-    }
-}
-
-// Responsive canvas
-window.addEventListener('resize', () => {
+function onWindowResize() {
     gameState.camera.aspect = window.innerWidth / window.innerHeight;
     gameState.camera.updateProjectionMatrix();
     gameState.renderer.setSize(window.innerWidth, window.innerHeight);
-});
+}
 
-// Start everything
+function onKeyDown(e) {
+    keys[e.key] = true;
+    if (e.key === 'p') togglePause();
+    if (e.key === 'm') toggleMute();
+}
+
+function onKeyUp(e) {
+    keys[e.key] = false;
+}
+
+function togglePause() {
+    gameState.gamePaused = !gameState.gamePaused;
+    domElements.pauseMenu.style.display = gameState.gamePaused ? 'block' : 'none';
+}
+
+function toggleMute() {
+    Howler.mute(!Howler.mute());
+}
+
+// Start the game
 init();
