@@ -1,0 +1,86 @@
+{
+  "name": "Cyberwave Asteroids",
+  "short_name": "CyberAsteroids",
+  "description": "Synthwave cyberpunk Asteroids game with neon aesthetics",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0a0410",
+  "theme_color": "#9d00ff",
+  "icons": [
+    {
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "description": "Gameplay screenshot showing neon spaceship"
+    },
+    {
+      "src": "screenshots/screenshot2.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "description": "Gameplay screenshot showing explosion effects"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.example.cyberwave"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://itunes.apple.com/app/cyberwave-asteroids/id123456789"
+    }
+  ],
+  "prefer_related_applications": false,
+  "features": [
+    "game",
+    "fullscreen",
+    "landscape"
+  ],
+  "categories": [
+    "game",
+    "arcade"
+  ]
+}
