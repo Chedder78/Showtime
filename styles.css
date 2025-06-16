@@ -1,0 +1,233 @@
+/* Core Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Base Styles */
+body {
+    font-family: 'Courier New', monospace;
+    background-color: #0a0410;
+    color: #00ffff;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+/* CRT Effect Overlay */
+.crt-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(rgba(18, 16, 16, 0.1) 50%, 
+        rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: overlay;
+}
+
+/* Game Canvas */
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    image-rendering: crisp-edges;
+}
+
+/* UI Container */
+#uiContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Control Areas */
+.control-area {
+    position: absolute;
+    bottom: 20px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    pointer-events: auto;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.control-area:active {
+    opacity: 1;
+}
+
+#joystick {
+    left: 30px;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 255, 255, 0.1) 70%);
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 15px #00ffff;
+}
+
+#fireButton {
+    right: 30px;
+    background: radial-gradient(circle, rgba(255, 0, 255, 0.2) 0%, rgba(255, 0, 255, 0.1) 70%);
+    border: 2px solid #ff00ff;
+    box-shadow: 0 0 15px #ff00ff;
+}
+
+#specialButton {
+    right: 170px;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(255, 255, 0, 0.2) 0%, rgba(255, 255, 0, 0.1) 70%);
+    border: 2px solid #ffff00;
+    box-shadow: 0 0 10px #ffff00;
+}
+
+/* UI Text Elements */
+.ui-text {
+    position: absolute;
+    color: #00ffff;
+    text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+    font-size: 16px;
+    padding: 5px;
+    z-index: 3;
+}
+
+#scoreDisplay {
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+}
+
+#levelDisplay {
+    top: 40px;
+    left: 10px;
+}
+
+#livesDisplay {
+    top: 70px;
+    left: 10px;
+}
+
+#powerupDisplay {
+    top: 100px;
+    left: 10px;
+}
+
+/* Game Over Screen */
+#gameOverScreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 4, 16, 0.9);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.game-over-text {
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+    margin-bottom: 20px;
+    font-size: clamp(24px, 6vw, 48px);
+    text-align: center;
+}
+
+.button {
+    background: linear-gradient(135deg, #9d00ff, #ff00ff);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    margin: 10px;
+    border-radius: 25px;
+    font-size: 18px;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 0 15px #ff00ff;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.button:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 5px #ff00ff;
+}
+
+/* Leaderboard */
+#leaderboard {
+    margin-top: 20px;
+    color: #00ffff;
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.leaderboard-entry {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    padding: 8px 12px;
+    background-color: rgba(0, 255, 255, 0.1);
+    border-radius: 5px;
+    text-shadow: 0 0 3px #00ffff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 500px) {
+    .control-area {
+        width: 100px;
+        height: 100px;
+    }
+    
+    #specialButton {
+        right: 140px;
+        width: 70px;
+        height: 70px;
+    }
+    
+    .ui-text {
+        font-size: 14px;
+    }
+    
+    #scoreDisplay {
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 768px) {
+    .control-area {
+        display: none;
+    }
+    
+    #gameOverScreen {
+        background-color: rgba(10, 4, 16, 0.8);
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
